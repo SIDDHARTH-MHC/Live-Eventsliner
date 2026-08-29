@@ -51,7 +51,7 @@ export default function MyTicketsPage() {
 
         <h1 className="text-display font-bold">My Tickets</h1>
         <p className="mt-2 text-body-lg text-muted-foreground">
-          Your passes across all Eventsliner events
+          Your passes across all Eventsliner Live events
         </p>
 
         {authRequired ? (

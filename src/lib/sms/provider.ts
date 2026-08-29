@@ -9,7 +9,7 @@ export class ConsoleSmsProvider implements SmsProvider {
         type: "sms_otp",
         phone: params.phone,
         code: params.code,
-        message: `Your Eventsliner code is ${params.code}. Valid for 10 minutes.`,
+        message: `Your Eventsliner Live code is ${params.code}. Valid for 10 minutes.`,
       }),
     );
   }

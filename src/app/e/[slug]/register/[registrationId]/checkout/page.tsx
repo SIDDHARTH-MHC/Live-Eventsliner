@@ -80,7 +80,7 @@ export default function CheckoutPage() {
       key: checkout.keyId,
       amount: checkout.amountCents,
       currency: checkout.currency,
-      name: "Eventsliner",
+      name: "Eventsliner Live",
       description: checkout.eventTitle,
       order_id: checkout.providerOrderId,
       prefill: {

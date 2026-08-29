@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { PublicShell } from "@/components/shells/public-shell";
 import { Button } from "@/components/ui/button";
+import { EventslinerLiveWordmark } from "@/components/brand/eventsliner-live-wordmark";
 
 type EventCard = {
   id: string;
@@ -70,11 +71,13 @@ export default function ConsumerAppPage() {
   }
 
   return (
-    <PublicShell>
+    <PublicShell showPlatformBrand={false}>
       <div className="mx-auto max-w-5xl px-4 py-8">
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-display font-bold">Eventsliner</h1>
+            <h1 className="mb-2">
+              <EventslinerLiveWordmark size="lg" href={null} />
+            </h1>
             <p className="mt-1 text-body-lg text-muted-foreground">Discover events in India</p>
           </div>
           <select

@@ -84,6 +84,6 @@ export async function generateMetadata({ params }: Props) {
   if (!event) return { title: "Event not found" };
   return {
     title: `${event.title} · ${event.org.name}`,
-    description: event.description ?? `Join ${event.title} on Eventsliner`,
+    description: event.description ?? `Join ${event.title} on Eventsliner Live`,
   };
 }

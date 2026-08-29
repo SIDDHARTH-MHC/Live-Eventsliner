@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { customSubdomainRedirect } from "@/lib/domains/custom-subdomain";
+import { EventslinerLiveWordmark } from "@/components/brand/eventsliner-live-wordmark";
 
 export default async function HomePage() {
   await customSubdomainRedirect();
@@ -22,9 +23,19 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-surface px-4 safe-top safe-bottom">
+    <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-4 safe-top safe-bottom">
+      <div
+        className="pointer-events-none absolute inset-0 -z-10"
+        aria-hidden
+        style={{
+          background:
+            "radial-gradient(ellipse 80% 60% at 50% 0%, color-mix(in srgb, var(--primary-container) 70%, transparent), transparent 70%), radial-gradient(ellipse 60% 50% at 100% 100%, color-mix(in srgb, var(--secondary-container) 55%, transparent), transparent 65%), var(--surface)",
+        }}
+      />
       <div className="mx-auto max-w-lg space-y-6 text-center">
-        <h1 className="text-display-sm">Eventsliner.live</h1>
+        <h1 className="flex justify-center">
+          <EventslinerLiveWordmark size="hero" href={null} />
+        </h1>
         <p className="text-body-lg text-muted-foreground">
           Run events in India — branded pages, registration, and check-in on one platform.
         </p>

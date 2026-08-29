@@ -21,7 +21,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       display: "standalone",
       background_color: "#ffffff",
       theme_color: "#6750a4",
-      icons: [{ src: "/icon-192.png", sizes: "192x192", type: "image/png" }],
+      icons: [
+        { src: "/icon.svg", sizes: "any", type: "image/svg+xml" },
+        { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      ],
     });
   });
 }

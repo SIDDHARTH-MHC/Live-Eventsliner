@@ -40,7 +40,7 @@ export class GupshupWhatsAppProvider implements WhatsAppProvider {
         channel: "whatsapp",
         source: this.source,
         destination: phone,
-        "src.name": "Eventsliner",
+        "src.name": "Eventsliner Live",
         template: JSON.stringify({
           id: params.templateId,
           params: params.params,

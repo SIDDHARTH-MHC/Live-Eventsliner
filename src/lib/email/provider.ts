@@ -37,7 +37,7 @@ export class ResendEmailProvider implements EmailProvider {
 
 export function getEmailProvider(): EmailProvider {
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.EMAIL_FROM ?? "noreply@eventsliner.live";
+  const from = process.env.EMAIL_FROM ?? "Eventsliner Live <noreply@eventsliner.live>";
   if (apiKey) {
     return new ResendEmailProvider(apiKey, from);
   }

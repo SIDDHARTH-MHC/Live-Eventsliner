@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
+import { EventslinerLiveWordmark } from "@/components/brand/eventsliner-live-wordmark";
 
 type PageShellProps = {
   title: string;
@@ -12,9 +12,7 @@ export function PageShell({ title, description, children, footer }: PageShellPro
   return (
     <div className="flex min-h-dvh flex-col bg-surface safe-top safe-bottom">
       <header className="border-b border-border px-4 py-4 md:px-6">
-        <Link href="/" className="text-title-md text-primary focus-visible:outline-none">
-          Eventsliner
-        </Link>
+        <EventslinerLiveWordmark size="md" href="/" />
       </header>
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-8 md:px-6">
         <div className="mb-8 space-y-2">

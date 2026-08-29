@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { CalendarDays, LayoutDashboard, LogOut, Settings } from "lucide-react";
+import { EventslinerLiveWordmark } from "@/components/brand/eventsliner-live-wordmark";
 
 type AppShellProps = {
   orgName: string;
@@ -32,6 +33,7 @@ export function AppShell({ orgName, orgSlug, children }: AppShellProps) {
       </a>
       <aside className="hidden w-64 shrink-0 border-r border-border bg-surface-container md:block">
         <div className="border-b border-border px-6 py-5">
+          <EventslinerLiveWordmark size="sm" href="/app" className="mb-4" />
           <p className="text-label-sm text-muted-foreground">Organization</p>
           <p className="text-title-md truncate">{orgName}</p>
         </div>
@@ -70,8 +72,9 @@ export function AppShell({ orgName, orgSlug, children }: AppShellProps) {
         </div>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-border px-4 py-4 md:hidden">
-          <div>
+        <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-4 md:hidden">
+          <EventslinerLiveWordmark size="sm" href="/app" />
+          <div className="min-w-0 text-right">
             <p className="text-label-sm text-muted-foreground">Organization</p>
             <p className="text-title-sm truncate">{orgName}</p>
           </div>

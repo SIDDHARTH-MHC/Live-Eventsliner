@@ -1,6 +1,8 @@
-# Eventsliner.live
+# Eventsliner Live
 
 India-first event platform — one **Event** entity with discovery, event website, and event app as interfaces (discovery is Phase 4; this slice ships the website spine).
+
+Product name: **Eventsliner Live**. Domain / email addresses use `eventsliner.live` (e.g. `noreply@eventsliner.live`).
 
 Canonical Git repository: https://github.com/SIDDHARTH-MHC/Live-Eventsliner.git
 

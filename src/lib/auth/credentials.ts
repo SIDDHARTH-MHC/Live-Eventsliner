@@ -41,9 +41,9 @@ export async function sendMagicLink(email: string): Promise<void> {
 
   await getEmailProvider().send({
     to: normalized,
-    subject: "Sign in to Eventsliner",
+    subject: "Sign in to Eventsliner Live",
     html: `<p>Tap to sign in (expires in ${MAGIC_LINK_TTL_MINUTES} minutes):</p><p><a href="${link}">${link}</a></p>`,
-    text: `Sign in to Eventsliner: ${link}`,
+    text: `Sign in to Eventsliner Live: ${link}`,
   });
 }
 
