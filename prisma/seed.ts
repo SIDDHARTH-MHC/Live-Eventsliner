@@ -7,6 +7,50 @@ import { ensureDefaultTemplates } from "../src/lib/comms/engine";
 
 const db = new PrismaClient();
 
+function hasRazorpayConfigured() {
+  return !!(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET);
+}
+
+function demoTicketTypes(eventId: string, orgId: string) {
+  const tickets = [
+    {
+      eventId,
+      orgId,
+      name: "Free seat",
+      description: "General admission — no payment required",
+      priceCents: 0,
+      mode: "open_free" as const,
+      quantity: 50,
+      sortOrder: 0,
+    },
+    {
+      eventId,
+      orgId,
+      name: "RSVP",
+      description: "Let us know if you are coming",
+      priceCents: 0,
+      mode: "rsvp" as const,
+      quantity: null,
+      sortOrder: 2,
+    },
+  ];
+
+  if (hasRazorpayConfigured()) {
+    tickets.splice(1, 0, {
+      eventId,
+      orgId,
+      name: "VIP workshop pass",
+      description: "Includes front-row seating and materials (mock paid — use dev checkout)",
+      priceCents: 49900,
+      mode: "open_paid" as const,
+      quantity: 20,
+      sortOrder: 1,
+    });
+  }
+
+  return tickets;
+}
+
 async function main() {
   const email = "demo@eventsliner.live";
 
@@ -72,69 +116,34 @@ async function main() {
       },
     });
 
-    await db.ticketType.createMany({
-      data: [
-        {
-          eventId: event.id,
-          orgId: org.id,
-          name: "Free seat",
-          description: "General admission — no payment required",
-          priceCents: 0,
-          mode: "open_free",
-          quantity: 50,
-          sortOrder: 0,
-        },
-        {
-          eventId: event.id,
-          orgId: org.id,
-          name: "VIP workshop pass",
-          description: "Includes front-row seating and materials (mock paid — use dev checkout)",
-          priceCents: 49900,
-          mode: "open_paid",
-          quantity: 20,
-          sortOrder: 1,
-        },
-        {
-          eventId: event.id,
-          orgId: org.id,
-          name: "RSVP",
-          description: "Let us know if you are coming",
-          priceCents: 0,
-          mode: "rsvp",
-          quantity: null,
-          sortOrder: 2,
-        },
-      ],
-    });
+    await db.ticketType.createMany({ data: demoTicketTypes(event.id, org.id) });
 
     await publishEvent(event.id, user.id);
     console.log(`Seeded published event: /e/${orgSlug}-product-workshop`);
   } else if (existingEvent.ticketTypes.length === 0) {
-    await db.ticketType.createMany({
-      data: [
-        {
-          eventId: existingEvent.id,
-          orgId: org.id,
-          name: "Free seat",
-          priceCents: 0,
-          mode: "open_free",
-          quantity: 50,
-          sortOrder: 0,
-        },
-        {
-          eventId: existingEvent.id,
-          orgId: org.id,
-          name: "VIP workshop pass",
-          priceCents: 49900,
-          mode: "open_paid",
-          quantity: 20,
-          sortOrder: 1,
-        },
-      ],
-    });
+    await db.ticketType.createMany({ data: demoTicketTypes(existingEvent.id, org.id) });
     console.log("Added ticket types to existing demo event");
   } else {
-    console.log("Seed event already exists — skipping");
+    console.log("Seed event already exists — checking publish state");
+  }
+
+  const draftEvent = await db.event.findFirst({
+    where: { orgId: org.id, slug: "product-workshop", status: "draft" },
+  });
+  if (draftEvent) {
+    if (!hasRazorpayConfigured()) {
+      await db.ticketType.deleteMany({
+        where: { eventId: draftEvent.id, priceCents: { gt: 0 } },
+      });
+      console.log("Removed paid ticket types (Razorpay not configured)");
+    }
+    const activeCount = await db.ticketType.count({
+      where: { eventId: draftEvent.id, isActive: true },
+    });
+    if (activeCount > 0) {
+      await publishEvent(draftEvent.id, user.id);
+      console.log(`Published draft demo event: /e/${orgSlug}-product-workshop`);
+    }
   }
 
   const event = await db.event.findFirst({
