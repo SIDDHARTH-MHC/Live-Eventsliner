@@ -38,6 +38,7 @@ Scoring (qualitative, not fake precision):
 
 | Feature | Pri | Value | Cx | Deps | Risk | First revenue? |
 |---------|-----|-------|----|------|------|----------------|
+| **Discovery search + city browse + organizer profiles** | **P1** | **High (flywheel)** | M | Published PUBLIC events | Building it *before* the spine, or never | After first events exist |
 | 24h reminder email | P1 | High (no-shows) | S | Jobs | — | Helps |
 | Communication engine (not hardcoded) | P1 | High | L | Messages | Rework if delayed | No |
 | WhatsApp ticket | P1 | High India | L | BSP, consent | Meta approval | Differentiator |
@@ -62,7 +63,8 @@ Scoring (qualitative, not fake precision):
 | Access zones | P2 | Med | L | |
 | Exhibitor portal + leads | P2 | High expo $ | L | Monetizable add-on |
 | Networking + rule match | P2 | Med | L | Collect profile fields |
-| PWA app shell + push | P2 | Med | L | |
+| PWA app shell + push | P2 | Med | L | Phase 5 attendee experience |
+| Discovery personalization / “what you may like” | P3 | Med | L | After Phase 4 search works; no AI required to start |
 | Offline check-in | P2 | High mega | XL | After online is perfect |
 | Custom subdomain | P2 | Low–med | M | |
 | Virtual watch page | P2 | Med | L | 3P video |
@@ -79,13 +81,29 @@ Scoring (qualitative, not fake precision):
 | Aadhaar in-house | UIDAI |
 | Kiosks / turnstiles / RFID wallets | Hardware company |
 | 3D / metaverse venue | Services tar pit |
-| Native iOS/Android v1 | Cost; PWA + WhatsApp |
-| AI matchmaking v1 | No data |
+| Native iOS/Android v1 | Cost; Stage 1 PWA then Stage 2 universal; Stage 3 white-label much later |
+| AI matchmaking / discovery recommendation AI v1 | No data; search+filter is enough |
 | Microservices | Premature |
 | Per-type backends | Forbidden by principle |
+| Separate listing/website/app backends | Forbidden: one Event |
 | Venue sourcing / hotels | Cvent's business |
 | Photobooth / 50 games / Picbot | Activations, not SaaS |
 | Hopin clone | Market moved on |
+
+---
+
+## 25.1 Flywheel (why discovery is P1 after the spine)
+
+```
+more organizers → more events → more PUBLIC inventory → more discovery
+  → more attendees → more registrations → more data → more organizer value → more organizers
+```
+
+Without discovery, Eventsliner is a Dreamcast-shaped OS that does not compound. Without the spine, discovery is Allevents-without-operations. **Sequence: P0 spine, then P1 discovery, then richer Dreamcast features.** Do not invert. Do not put discovery in the first 20 tasks.
+
+**Every published public event is both an event website and a potential discovery object. Eventsliner.live must treat event discovery as a first-class platform capability, while allowing organizers to opt out through visibility settings.**
+
+**Event is the canonical object. Discovery, event website, and event app are interfaces on that object, not separate products.**
 
 ---
 
@@ -94,18 +112,17 @@ Scoring (qualitative, not fake precision):
 | Phase | Engineering complexity | Main risk |
 |-------|------------------------|-----------|
 | 0 Foundations | M | Auth/DLT delays |
-| 1 Event + site | M | Taste / performance |
+| 1 Event website | M | Taste / performance |
 | 2 Registration + pay | **L–XL** | Money + inventory |
 | 3 Check-in | **L** | Device zoo, races |
-| 4 Comms / WA | L | Meta / DLT |
-| 5 Sessions | M | Scope creep CMS |
-| 6 Expo / network | L | Permissions explosion |
-| 7 PWA | M | Push flakiness |
+| **4 Discovery + search + org profiles** | **M** | Treating it as a second Event; or skipping it forever |
+| 5 Comms / WA + event PWA | L | Meta / DLT; empty app tabs |
+| 6 Sessions + networking | M–L | Scope creep CMS |
+| 7 Exhibitors + sponsors | L | Permissions explosion |
 | 8 Virtual | L | Media edge cases |
-| 9 Enterprise | L | Sales-driven scope |
-| 10 Hardware | XL | Support burden |
+| 9 Enterprise / Dreamcast-class | L–XL | Sales-driven scope; hardware support |
 
-Phase 2 and 3 are the project. Everything else is optional until those are dull.
+Phases **2 and 3** are the first revenue project. Phase **4** is the next first-class capability (not optional forever, not in the first 20). Everything Dreamcast-fancy waits until 0–3 are dull.
 
 ---
 
@@ -123,6 +140,8 @@ Phase 2 and 3 are the project. Everything else is optional until those are dull.
 | DLT / WhatsApp not approved | India reality | Email-first; start paperwork now |
 | Venue wifi | Check-in dies | Design offline_id; don't build offline yet; use staff LTE |
 | Scope: "just add FR" | Sales | This document |
+| **Explosion: website builder + iOS + Android + discovery + Dreamcast at once** | Five companies | Sequence in [13](13-mvp-roadmap-tickets.md) / [17](17-discovery-and-surfaces.md) |
+| **Discovery as a listing table** | Dual writes, drift from Event | One Event; visibility × published |
 | Event type forks | "Exhibition needs its own service" | Module flags |
 | Building Mixhub | Ego | Integrate video |
 | Connecting Student/.org too early | Coupled identity | Separate tenants forever until a written product decision |
@@ -161,10 +180,10 @@ Inclusive vs exclusive display; SAC code; who issues invoice (us vs organizer). 
 Organizer-defined vs platform-enforced windows. **Recommendation:** organizer-defined, we execute.
 
 ### D9 — Waitlist / overbook
-Off until Phase 4. **Recommendation:** yes.
+Off until after MVP spine (not Phase 4 discovery). **Recommendation:** yes, after Phase 2–3 are stable.
 
 ### D10 — WhatsApp entity
-Which legal entity applies to Meta/BSP. Start now.
+Which legal entity applies to Meta/BSP. Start now. (Comms engine is **Phase 5**.)
 
 ### D11 — Eventsliner Student / .org
 Confirmed **no connection**. Revisit only with a written identity-federation RFC.
@@ -183,4 +202,14 @@ Luma-level public pages. Assign someone with taste. A correct-but-ugly MVP will 
 ### D15 — Analytics vendor for our SaaS
 PostHog vs first-party only. Either is fine; customer dashboards stay first-party.
 
-Record the answers in a `DECISIONS.md` when coding starts.
+### D16 — Default visibility: PUBLIC vs UNLISTED
+Whether a newly created (or newly published) event is **PUBLIC** (in discovery once published) or **UNLISTED** (website by link only).
+
+**Recommendation:** default **PUBLIC** so the flywheel has inventory; one-click UNLISTED/PRIVATE to opt out. Corporate event type may default UNLISTED. Confirm before Phase 4 ships; store the field from Phase 1.
+
+### D17 — Discovery geography: city-first India
+Whether Phase 4 browse is city-first (Delhi, Bengaluru, Mumbai, …) vs a single national feed.
+
+**Recommendation:** **city-first India**, Delhi as the first example city (“this weekend in Delhi”, “near you”). Keyword search still works nationally. Do not wait on a global recommendation model.
+
+Record the answers in `DECISIONS.md` when coding starts.

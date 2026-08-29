@@ -47,7 +47,7 @@ Roles are **claims**, not separate products. One human can be an organizer of ev
 ### Exhibitor admin / exhibitor staff
 - **Sees:** exhibitor dashboard, own leads, own booth staff.
 - **Does:** assign passes, scan leads, request meetings.
-- **Phase 6.**
+- **Phase 7.**
 
 ### Sponsor
 - **Sees:** sponsor kit, optional lead/impression metrics.
@@ -58,6 +58,17 @@ Roles are **claims**, not separate products. One human can be an organizer of ev
 - **Sees:** public event page, own ticket/QR, later app features.
 - **Does:** register, pay, show QR, update own profile if we allow.
 - **May not have a User account** (magic-link / QR-only). v1: create a user on register if email/phone given.
+
+### Discovery visitor (consumer)
+- **Sees:** `/discover`, city browse, event cards, organizer public profiles, `/e/:slug` for PUBLIC (and UNLISTED if they have the link).
+- **Does:** search, filter, open website, later follow organizer, later save to calendar.
+- **Not an attendee until they register.** Not a separate identity product — usually anonymous or the same User.
+- **v1 / first 20:** does not exist as a surface. Field visibility still exists on Event. **Phase 4.**
+
+### Follower (later, Phase 4+)
+- **Sees:** Home/Following rails for orgs they follow.
+- **Does:** `Follow` an Organization.
+- **Not a separate auth role.** Same User. See [17-discovery-and-surfaces.md](17-discovery-and-surfaces.md).
 
 ### VIP
 - **Sees:** same as attendee + VIP session/lounge markers.
@@ -83,6 +94,7 @@ Actions × roles. `P` = platform admin, `O` = org owner, `A` = org admin, `M` = 
 | Create event | Y | Y | Y | | | | | | |
 | Edit event settings | Y | Y | Y | Y | | | | | |
 | Publish event | Y | Y | Y | Y | | | | | |
+| Set visibility (public/unlisted/private) | Y | Y | Y | Y | | | | | |
 | Edit site | Y | Y | Y | Y | | | | | |
 | Manage ticket types | Y | Y | Y | Y | | | | | |
 | Connect payments | Y | Y | | | | | | | |
@@ -105,6 +117,8 @@ Actions × roles. `P` = platform admin, `O` = org owner, `A` = org admin, `M` = 
 **v1 implemented roles:** Platform admin (internal), Org owner, Event manager (same as owner for that org's events), Check-in staff, Attendee.
 
 VIP / Media / Volunteer are **ticket categories or flags**, not extra auth systems.
+
+**Discovery:** appearing in `/discover` is not an RBAC action. It is `Event.status = published` AND `Event.visibility = public`. Discovery visitors have no elevated role. Follow-organizer is a User→Organization edge, Phase 4+.
 
 ---
 
@@ -150,7 +164,7 @@ Create account (email or phone)
 ### 7.2 Attendee
 
 ```
-Discover event (link, QR poster, WhatsApp, later SEO)
+Discover event (link, QR poster, WhatsApp, **later `/discover` / city page / organizer profile**)
   → Event page
   → Select ticket
   → Register (fields + consent)
@@ -172,6 +186,20 @@ Discover event (link, QR poster, WhatsApp, later SEO)
 - Lost email → retrieve by phone OTP
 - Dead phone at gate → manual search
 - Duplicate registration → show existing ticket
+
+### 7.2b Discovery visitor (Phase 4)
+
+```
+Land on /discover (or city: Delhi this weekend)
+  → Search / filter (keyword, location, date, category, price, type)
+  → OR browse rail (trending, near you, this weekend, popular, new, free, online)
+  → Event card
+  → Organizer profile (optional)
+  → Event website /e/:slug
+  → (then attendee journey)
+```
+
+**Failure paths:** PRIVATE/UNLISTED events must not appear. Unpublished must not appear. Empty city (no Delhi events) is an empty state, not a fake feed. No recommendation AI required for this journey.
 
 ### 7.3 Event staff (check-in)
 
@@ -283,6 +311,7 @@ This is why Attendee can be created without a prior public Registration URL visi
 |---------|-----|-------|
 | Organizer create → publish → export | Yes | Payments if paid |
 | Attendee register → QR → email | Yes | WhatsApp later |
+| Discovery visitor → card → website | **No (Phase 4)** | First 20: share `/e/:slug` only |
 | Staff scan / search | Yes | Online only |
 | Speaker self-serve | No | CMS only |
 | Exhibitor / sponsor portals | No | Logos optional on template |

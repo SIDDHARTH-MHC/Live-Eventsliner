@@ -4,7 +4,15 @@ Do not write product feature code until the plan is approved and the decisions i
 
 **Design system is not optional.** Before any UI (including shells in task 2), follow [16-design-system.md](16-design-system.md) and `.cursor/rules/design-system.mdc` (`alwaysApply: true`). Building screens that ignore Material 3 tokens or the Apple HIG accessibility/interaction bar is forbidden.
 
-When they do, execute **these tasks in order**. This is the first engineering slice — Phase 0 and the first days of Phase 1. It is not the whole MVP.
+When they do, execute **these tasks in order**. This is the first engineering slice — Phase 0 and the first days of Phase 1. It is not the whole MVP. It is **not** discovery.
+
+**Architectural rules (do not violate in this slice or later):**
+
+> Every published public event is both an event website and a potential discovery object. Eventsliner.live must treat event discovery as a first-class platform capability, while allowing organizers to opt out through visibility settings.
+
+> Event is the canonical object. Discovery, event website, and event app are interfaces on that object, not separate products.
+
+Store `visibility` on Event from task 14. Do **not** build `/discover`, search rails, or organizer public profiles in these 20 tasks.
 
 ---
 
@@ -12,10 +20,10 @@ When they do, execute **these tasks in order**. This is the first engineering sl
 
 These are not optional "process." They unblock India.
 
-0. **Record D1–D15** in `DECISIONS.md` (commercial model, merchant of record, region, GST owner, no Student/.org).
+0. **Record D1–D17** in `DECISIONS.md` (commercial model, merchant of record, region, GST owner, no Student/.org, **default visibility D16**, **city-first discovery D17**).
 1. **Create provider accounts (staging):** Razorpay test, Resend or SES + domain, Sentry, object storage, Postgres.
 2. **Start MSG91 + DLT registration** (documents, entity, template for OTP). Until approved, ship email magic-link and a dev OTP console.
-3. **Start Meta Business / WhatsApp BSP conversation** (Gupshup or Interakt). Not needed to code Phase 0–3. Needed so Phase 4 is not a 8-week surprise.
+3. **Start Meta Business / WhatsApp BSP conversation** (Gupshup or Interakt). Not needed to code Phase 0–3. Needed so **communication (Phase 5)** is not an 8-week surprise. Phase 4 is discovery, not WhatsApp.
 4. **Engage a CA** for SAC/GST display before any live INR charge.
 
 ---
@@ -78,6 +86,8 @@ Organizer preview route. Not public yet. Server-render. Phone-width layout. Stic
 ### 18. Publish / unpublish + public slug route
 `POST publish` requires title, starts_at, timezone. Public `GET /e/:slug`. Unpublished → 404. Cache-Control for public GET. JSON-LD Event.
 
+**Note (do not implement discovery here):** this public `GET /e/:slug` is the **event website**, not the discovery marketplace. Discovery (`/discover`, search, browse, organizer profiles) is a first-class **later** capability (Phase 4 in [13-mvp-roadmap-tickets.md](13-mvp-roadmap-tickets.md)). Publishing a **PUBLIC** event must *eventually* make it a discovery object; this slice does not build that interface. UNLISTED still serves `/e/:slug` to anyone with the link. PRIVATE does not.
+
 ### 19. AnalyticsEvent writer
 Table + `track()` helper. Emit `product.org_created`, `event.published`, `page_view` on public page. No dashboard yet.
 
@@ -88,6 +98,7 @@ One-click or documented deploy. `.env` for staging. Seed script: one org, one pu
 
 ## Explicitly not in the first 20
 
+- **Discovery marketplace, `/discover`, public event search/browse, organizer public profiles, Following, recommendation feeds**
 - Ticket types, Razorpay, QR, check-in
 - WhatsApp
 - Speakers, exhibitors, AI
@@ -96,11 +107,13 @@ One-click or documented deploy. `.env` for staging. Seed script: one org, one pu
 - Eventsliner Student integration
 - Facial recognition
 - A second event-type codebase
+- Native iOS / Android / white-label apps
+- A second Event / listing table
 
 ---
 
 ## After task 20
 
-Go to [13-mvp-roadmap-tickets.md](13-mvp-roadmap-tickets.md) Phase 2, then Phase 3, without inventing new phases. If a stakeholder asks for badges or a native app, point them at MUST / SHOULD / LATER / DO NOT BUILD.
+Go to [13-mvp-roadmap-tickets.md](13-mvp-roadmap-tickets.md) **Phase 2**, then **Phase 3**, without inventing new phases and **without starting Phase 4 discovery**. If a stakeholder asks for badges, a native app, or “just ship Luma explore,” point them at MUST / SHOULD / LATER / DO NOT BUILD and at [17-discovery-and-surfaces.md](17-discovery-and-surfaces.md).
 
-The first event you should be afraid to run is the one after Phase 3 is done — not after Phase 0. Ship the spine.
+The first event you should be afraid to run is the one after Phase 3 is done — not after Phase 0. Ship the spine. Then discovery.

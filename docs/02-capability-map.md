@@ -461,7 +461,7 @@ Registration is a **state machine**, not a form. Full design: [08-registration-p
 
 ### 2.9.3 Barcode / NFC / RFID
 - **Does:** Alternate encodings of the same credential.
-- **Horizon:** Barcode Later (printers). NFC/RFID Phase 10. **Cx:** L–XL. **Pri:** P3.
+- **Horizon:** Barcode Later (printers). NFC/RFID Phase 9 hardware. **Cx:** L–XL. **Pri:** P3.
 
 ### 2.9.4 M-Badge
 - **Does:** Mobile rendering of credential + name + event branding, deliverable via WhatsApp/email.

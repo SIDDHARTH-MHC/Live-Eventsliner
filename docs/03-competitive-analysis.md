@@ -20,7 +20,7 @@ In-person ticketing ──────────── Virtual-first
      Luma (light)                  vFairs / Mixhub-class
 ```
 
-Eventsliner.live should sit **left-of-center and down**: self-serve, in-person-first, India-native, with a path up and right.
+Eventsliner.live is **Luma's network + Dreamcast's OS on one Event** — not a clone of either. Sit **left-of-center and down** for the first revenue (self-serve, in-person-first, India-native), with discovery as a **first-class later interface** (Phase 4) on the same Event, and a path up and right for enterprise / Dreamcast-class ops.
 
 ---
 
@@ -52,7 +52,7 @@ Eventsliner.live should sit **left-of-center and down**: self-serve, in-person-f
 
 **Not worth building:** their hardware, cashless RFID, 3D Mixhub, photobooths, in-house FR.
 
-**Eventsliner differentiation vs Dreamcast:** self-serve, hours-not-weeks launch, modern UX, transparent pricing, software-only reliability. Do not fight them at IMC-scale gates in year one.
+**Eventsliner vs Dreamcast:** we are not their clone. They are the OS + hardware + humans reference. We take the **software OS** (self-serve, hours-not-weeks, modern UX, transparent pricing) and put it on the **same Event** that also feeds a public network. Do not fight them at IMC-scale gates in year one. Do not pretend we are only a microsite vendor.
 
 ---
 
@@ -79,9 +79,9 @@ Eventsliner.live should sit **left-of-center and down**: self-serve, in-person-f
 
 **Difficult to replicate:** taste and community flywheel.
 
-**Not worth copying blindly:** their discovery social network (expensive, not the Indian B2B job-to-be-done).
+**Not worth copying blindly:** their closed social graph as year-one engineering. **Worth taking:** public discovery as a **first-class capability** on our Event (city-first India, search + filters, organizer profiles) — Phase 4, not the first 20 tasks, and **not** a second product.
 
-**Eventsliner differentiation vs Luma:** India commerce + credential/check-in spine + event types beyond house parties and tech mixers. Steal their *page quality bar*, not their business.
+**Eventsliner vs Luma:** we are not their clone. They are the **network + taste** reference. We steal *page quality* and, after the spine, *discoverability*. We add India commerce + credential/check-in + event types beyond house parties. Discovery here is inventory of **our** PUBLIC events, not a clone of Luma's host graph.
 
 ---
 
@@ -108,9 +108,9 @@ Eventsliner.live should sit **left-of-center and down**: self-serve, in-person-f
 
 **Difficult to replicate:** marketplace SEO and demand.
 
-**Not worth building:** a public consumer marketplace in v1. That is a different company.
+**Not worth building in v1:** Eventbrite's SEO marketplace as the *company*. **Worth building after the spine (Phase 4):** search + city browse + organizer profiles on **our** published PUBLIC events — a network, not a take-rate marketplace.
 
-**Eventsliner differentiation vs Eventbrite:** no (or low, transparent) ticket tax; organizer-owned list; better B2B registration; India rails.
+**Eventsliner vs Eventbrite:** no (or low, transparent) ticket tax; organizer-owned list; better B2B registration; India rails; discovery that does not become the merchant of record (D2).
 
 ---
 
@@ -284,7 +284,7 @@ Every competitor has these. Quality of execution still matters (Luma proves it).
 | On-site mega-event operations | Dreamcast | No, not first |
 | Consumer marketplace demand | Eventbrite, BMS | No |
 | Venue graph + enterprise procurement | Cvent | No |
-| Community/host network | Luma | Lightly (public pages, not a social network) |
+| Community/host network | Luma | **Yes, as discovery on our Event (Phase 4)** — city browse, not a social OS in year one |
 | WhatsApp + India settlement + GST as one flow | Dreamcast, Townscript | **Yes** |
 | Credential → check-in correctness under load | Dreamcast, Eventbrite | **Yes, software-only** |
 | Taste | Luma | **Yes** |
@@ -299,7 +299,7 @@ Every competitor has these. Quality of execution still matters (Luma proves it).
 - Aadhaar in-house
 - RFID cashless wallets
 - 3D/metaverse venues
-- Native apps before PWA
+- Native apps before Stage 1 PWA / Stage 2 universal app
 - Venue sourcing
 - Hotel booking
 - Photobooth / social wall / 50 games
@@ -311,9 +311,11 @@ Every competitor has these. Quality of execution still matters (Luma proves it).
 
 ## 3.14 Eventsliner positioning statement
 
-**For Indian and India-first organizers running real in-person events (50–5,000 people to start), Eventsliner.live is the self-serve event operating system that takes you from a branded page to a scanned credential without a sales call, without Eventbrite fees, and without a Dreamcast-sized production contract.**
+**For Indian and India-first organizers and attendees, Eventsliner.live is both a public event network (Luma) and an event operating system (Dreamcast) on one Event:** branded website, registration, tickets, check-in — and, once published PUBLIC, a discovery object — without a sales call, without Eventbrite fees, and without a Dreamcast-sized production contract.
 
-Later: the same OS grows into sessions, exhibitors, networking, WhatsApp, and optional on-site print partners — still one event object.
+Not a Luma clone. Not a Dreamcast clone. Three surfaces (discovery, `/e/:slug`, event app), one entity.
+
+Later: the same OS grows into sessions, exhibitors, networking, WhatsApp, optional on-site print partners, and (much later) white-label apps — still one Event.
 
 ---
 
@@ -326,8 +328,9 @@ Later: the same OS grows into sessions, exhibitors, networking, WhatsApp, and op
 | Multi-category B2B registration | D | C | B | A | A | **A (phased)** |
 | Trust the gate at 500 people | C | B | C | A | B | **A** |
 | Trust the gate at 50,000 people | F | C | D | A | B | **C then B** |
-| WhatsApp ticket | F | F | B | A | F | **A (phase 4)** |
-| Exhibitor leads | F | F | D | A | A | **B (phase 6)** |
+| WhatsApp ticket | F | F | B | A | F | **A (phase 5)** |
+| Exhibitor leads | F | F | D | A | A | **B (phase 7)** |
+| Public discovery (city / search) | A | A | C | F | D | **A (phase 4)** |
 | Virtual venue | D | D | D | B | B | **C (integrate)** |
 | Self-serve price | A | B | A | F | F | **A** |
 | Enterprise SSO / audit | F | C | D | C | A | **B (phase 9)** |

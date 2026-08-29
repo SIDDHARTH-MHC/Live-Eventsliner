@@ -19,3 +19,5 @@ Fill this before application code starts. Context: [14-prioritization-risks-deci
 | D13 | Design taste bar | **Luma-quality public pages inside the binding design system** ([16-design-system.md](16-design-system.md); `.cursor/rules/design-system.mdc`). Material 3 structure + Apple HIG interaction/a11y. Building UI without that system is forbidden. | | |
 | D14 | Offline check-in for first events | _Recommended: no_ | | |
 | D15 | Product analytics vendor | _Optional PostHog; customer dashboards first-party_ | | |
+| D16 | Default visibility PUBLIC vs UNLISTED | _Recommended: PUBLIC (opt out via UNLISTED/PRIVATE); corporate type may default UNLISTED_ | | |
+| D17 | Discovery geography | _Recommended: city-first India; Delhi as first example city_ | | |

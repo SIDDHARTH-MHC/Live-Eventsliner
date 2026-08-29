@@ -153,8 +153,8 @@ Dreamcast's badge story is hardware + ops. Eventsliner's badge story is **softwa
 | Layer | We build? | When |
 |-------|-----------|------|
 | Badge data (name, org, type, QR, access color) | Yes | Already in attendee+credential |
-| Badge template editor | Yes | Phase 5–6 |
-| PDF / PNG / ZPL / TSPL payload | Yes | Phase 5–6 |
+| Badge template editor | Yes | Phase 9 |
+| PDF / PNG / ZPL / TSPL payload | Yes | Phase 9 |
 | Printer hardware | **No** | Ever |
 | Kiosk enclosure | **No** | Ever |
 | On-site print operators | **No** | Services SKU maybe |

@@ -225,7 +225,7 @@ Pattern: they win when **the gate is the product**. IMC and JLF are not "nice ev
 | Badge printers (Zebra, Brother, Evolis, PVC) | Deploy + support | Integrate print payload later |
 | Self-serve kiosks (Fastest Indian, Ticket ka ATM) | In-house product | Never build. Optional partner. |
 | Tablets, stands, iPads | Kit they bring | Organizer BYOD |
-| RFID/NFC readers and wristbands | Cashless + access SKU | Phase 10+, partner |
+| RFID/NFC readers and wristbands | Cashless + access SKU | Phase 9+, partner |
 | Turnstiles | Integration | Partner / venue |
 | Networking pods | Physical ops | Ignore |
 | Photobooths | Engagement SKU | Ignore |
@@ -292,7 +292,7 @@ Pattern: they win when **the gate is the product**. IMC and JLF are not "nice ev
 4. **No commission is a positioning weapon** they already use against Eventbrite. Decide Eventsliner's take-rate story before coding checkout.
 5. **Brand disappearance** (white-label) is table stakes for serious organizers. Do not watermark attendee-facing pages with Eventsliner in a way that fights the organizer.
 6. **Scale theater is expensive.** Designing day-one for 500,000 concurrent check-ins is how you never ship. Design the *model* for it (idempotent scans, offline queue, credential hashing) and the *deployment* for 2,000.
-7. **Aadhaar and facial recognition are enterprise/security products** with legal residual risk. They are Phase 10, if ever, and only through certified vendors.
+7. **Aadhaar and facial recognition are enterprise/security products** with legal residual risk. They are Phase 9+, if ever, and only through certified vendors.
 
 ---
 
@@ -311,7 +311,7 @@ See [02-capability-map.md](02-capability-map.md) for the exploded tree. Summary 
 | RFID / FR / turnstiles | High | Do not build |
 | Event app | High, often custom | PWA first |
 | Networking / AI match | Medium-high (claimed AI) | Rule-based later; AI last |
-| Exhibitors / leads | High at expo scale | Phase 6 |
+| Exhibitors / leads | High at expo scale | Phase 7 |
 | Virtual / 3D | High + studio | Integrate Daily/100ms/Mux; never Mixhub |
 | Cashless RFID wallets | Separate product | Do not build |
 | Analytics | Medium-high | First-party events from day one |

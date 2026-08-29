@@ -1,5 +1,7 @@
 # 22–24. MVP, phased roadmap, and engineering breakdown
 
+The MVP is the **OS spine** (website → register → pay → QR → check-in). **Discovery is first-class and Phase 4**, not a year-five rewrite and **not** in this MVP. See [17-discovery-and-surfaces.md](17-discovery-and-surfaces.md).
+
 ---
 
 ## 22. Brutally small MVP
@@ -44,6 +46,7 @@ Create org
 
 ### Out of MVP (even if tempting)
 
+- **Discovery marketplace** (`/discover`, search, browse rails, organizer public profiles, Following)
 - WhatsApp
 - Promo codes, waitlist, group registration, approval, invite-only
 - Conditional forms
@@ -52,7 +55,7 @@ Create org
 - Exhibitors, networking, AI
 - Offline check-in
 - Custom domains
-- Native apps
+- Native apps / white-label store apps
 - Virtual rooms
 - SSO
 - Facial / Aadhaar
@@ -73,25 +76,30 @@ An organizer in India publishes a paid or free event on Eventsliner, 30+ people 
 
 ## 23. Phased roadmap
 
-Phases are **dependency-ordered**, not calendar-estimated.
+Phases are **dependency-ordered**, not calendar-estimated. **Event is the canonical object.** Discovery, event website, and event app are interfaces on that object — sequenced, not parallel companies.
+
+Keep **Phase 0 / first 20 tasks** as START HERE. Do **not** expand that slice into building discovery.
 
 ```
 Phase 0   Foundations (architecture, design system, auth, tenancy, observability)
-Phase 1   Core event platform (org, event, site template, public page)
+Phase 1   Event foundation — branded website `/e/:slug` (Event Experience / event_sites)
 Phase 2   Registration + ticketing + payments
-Phase 3   Credentials + check-in + live ops
-Phase 4   Communication engine (email hardened, WhatsApp, surveys, reminders as platform)
-Phase 5   Sessions, speakers, sponsors, richer site blocks
-Phase 6   Exhibitors + lead capture + networking (rule-based)
-Phase 7   Attendee PWA (agenda, ticket, notifications)
-Phase 8   Virtual/hybrid via 3P video
-Phase 9   Enterprise (SSO, API, webhooks, domains, retention)
-Phase 10  Hardware partners, offline check-in, identity vendors
+Phase 3   Check-in + attendance (credentials, QR, staff scan)
+Phase 4   Discovery + search + organizer profiles     ← first-class; AFTER spine; BEFORE fancy Dreamcast
+Phase 5   Communication + attendee experience (email/WA engine, Stage 1 event PWA)
+Phase 6   Sessions + networking
+Phase 7   Exhibitors + sponsors
+Phase 8   Virtual + hybrid (3P video)
+Phase 9   Enterprise / Dreamcast-class infrastructure (SSO, API, domains, later hardware partners)
 ```
 
-**Do not run Phase 6–10 before 0–3 are boringly reliable.**
+**Do not run Phase 4 before 0–3 are boringly reliable.** Public `GET /e/:slug` is the **event website**, not the marketplace.
 
-Phase 4 can partially overlap Phase 3 (templates exist in 2–3 as hardcoded email). The *engine* is Phase 4.
+**Do not run Phase 6–9 before 0–3.** Moving **basic discovery earlier** than exhibitors, Mixhub, and white-label apps is intentional: the flywheel needs inventory on the network after organizers can actually run an event.
+
+Phase 5 comms can partially overlap Phase 3 (templates exist in 2–3 as hardcoded email). The *engine* is Phase 5.
+
+**Explosion risk:** do not build website builder + iOS + Android + discovery + Dreamcast hardware as one program. See [17-discovery-and-surfaces.md](17-discovery-and-surfaces.md) and [14](14-prioritization-risks-decisions.md).
 
 ---
 
@@ -169,7 +177,9 @@ Ticket language is implementation-sized. "Build registration" is banned.
 
 ---
 
-### Phase 1 — Core event platform + website
+### Phase 1 — Event foundation (website)
+
+**This is the event website, not discovery.** `/e/:slug` is a branded Event Experience. Discovery is Phase 4.
 
 **Epics**
 
@@ -219,7 +229,7 @@ Ticket language is implementation-sized. "Build registration" is banned.
 **QA**
 
 - Unpublished not reachable
-- Private/unlisted
+- Private/unlisted **website** rules (unlisted: link works; private: not public). **Do not** build `/discover` here.
 - Mobile layout
 - Timezone display IST vs others
 
@@ -390,43 +400,84 @@ Ticket language is implementation-sized. "Build registration" is banned.
 
 ---
 
-### Phase 4 — Communication platform + WhatsApp + survey
+### Phase 4 — Discovery + search + organizer profiles
 
-**Epics:** template store, policy table, WhatsApp adapter, blast (simple), post-event survey form, bounce handling.
+**Not MVP. Not first 20.** First-class after Phases 0–3. **Earlier than** sessions-as-CMS-product, exhibitors, Mixhub, white-label apps — because the flywheel is organizers → PUBLIC events → inventory → attendees.
 
-**Stories:** organizer edits confirmation copy; attendee gets WA ticket; organizer sends a reminder blast to not-checked-in.
+**Every published public event is both an event website and a potential discovery object.** This phase *consumes* that rule; Phases 1–3 already stored `visibility`.
 
-**Tickets (abbrev.):** MessageTemplate CRUD; renderer; Gupshup adapter; Meta template ids config; consent gate; delivery webhooks; survey form reuse; feedback trigger.
+**Epics**
 
-**DoD:** Same trigger can send email, and WA if consented and configured.
+- E4.1 Discoverability query (`published` + `public` only; unlisted/private never)
+- E4.2 Search API: keyword, location/city, date, category, price, event type
+- E4.3 Browse rails: trending, near you, this weekend, popular, new, free, online
+- E4.4 Event card projection (website URL, organizer, sessions if any, tickets, related — rules not ML)
+- E4.5 Organizer public profile (`/o/:orgSlug` or `/orgs/:slug`)
+- E4.6 Consumer `/discover` UI (city-first: Delhi example)
+- E4.7 Indexes: `(status, visibility, starts_at)`, city, `price_min` denorm if needed
+- E4.8 Follow organizer (can slip to 4b if timeboxed)
+
+**User stories**
+
+- As a person in Delhi, I browse “this weekend” and “near you” and only see PUBLIC published events.
+- As a visitor, I search “design workshop” + Delhi + free and open `/e/:slug`.
+- As a visitor, I open an organizer profile and see their PUBLIC upcoming events.
+- As an organizer, I set UNLISTED and the website link still works; I do not appear in `/discover`.
+- As an organizer, I do **not** fill a second “submit to marketplace” form.
+
+**Backend**
+
+- Public discover list/filter; no second `listings` table
+- City facet (India: Delhi, NCR, then other metros) — [D17](DECISIONS.md)
+- Related events: same city / type / organizer, simple SQL
+- `event.published` / visibility change → reindex (Postgres is enough)
+
+**Frontend**
+
+- `/discover` (search + filters + rails)
+- Event card → `/e/:slug`
+- Organizer profile
+- Empty city state (no fake AI feed)
+
+**API:** see [07-architecture.md](07-architecture.md) discovery endpoints.
+
+**QA:** PRIVATE/UNLISTED absent from all rails; draft absent; cancelled hidden or clearly ended; load on public GET.
+
+**DoD:** A stranger in Delhi can find a PUBLIC workshop without the organizer DMing the slug. **No recommendation AI.** Personalization / “what you may like” is later on the same index.
+
+**Not in this phase:** native apps, website builder v3, Dreamcast hardware.
 
 ---
 
-### Phase 5 — Sessions, speakers, sponsors, site blocks
+### Phase 5 — Communication + attendee experience
 
-**Epics:** tracks/sessions CRUD; speaker CMS; sponsor logos; site sections for the above; optional session capacity.
+**Epics:** template store, policy table, WhatsApp adapter, blast (simple), post-event survey form, bounce handling; **Stage 1 event PWA** after register (My Pass, add to home screen; Schedule/Speakers/Exhibitors/Networking tabs only if data exists).
 
-**Stories:** attendee sees schedule on the public page; organizer prints a speaker grid that is not a spreadsheet screenshot.
+**Stories:** organizer edits confirmation copy; attendee gets WA ticket; attendee installs PWA and opens My Pass; organizer sends a reminder blast to not-checked-in.
 
-**DoD:** Conference-type default modules on; meetup-type hides them.
+**Tickets (abbrev.):** MessageTemplate CRUD; renderer; Gupshup adapter; Meta template ids config; consent gate; delivery webhooks; survey form reuse; feedback trigger; PWA shell + ticket offline as cached image (gate still online unless Phase 9 hardware/offline).
 
----
-
-### Phase 6 — Exhibitors + networking
-
-**Epics:** exhibitor + booth + quota; exhibitor staff login; lead scan; networking profile; connect; rule-based suggestions.
-
-**Stories:** exhibitor leaves with a CSV of leads; two attendees connect via QR.
-
-**DoD:** Lead unique per (exhibitor, attendee); networking QR ≠ gate credential.
+**DoD:** Same trigger can send email, and WA if consented and configured. Add to Home Screen works on Android Chrome.
 
 ---
 
-### Phase 7 — Attendee PWA
+### Phase 6 — Sessions + networking
 
-**Epics:** installable app shell; my agenda; announcements; web push; polls/Q&A or Slido embed.
+**Epics:** tracks/sessions CRUD; speaker CMS; site sections for schedule/speakers; optional session capacity; networking profile; connect; rule-based suggestions.
 
-**DoD:** Add to Home Screen shows ticket offline as a **cached image** (gate still needs online validate unless Phase 10).
+**Stories:** attendee sees schedule on the website and in the event PWA; two attendees connect via QR.
+
+**DoD:** Conference-type default modules on; meetup-type hides them. Networking QR ≠ gate credential.
+
+---
+
+### Phase 7 — Exhibitors + sponsors
+
+**Epics:** exhibitor + booth + quota; exhibitor staff login; lead scan; sponsor tiers/logos on site/app.
+
+**Stories:** exhibitor leaves with a CSV of leads; sponsor logos are not a spreadsheet screenshot.
+
+**DoD:** Lead unique per (exhibitor, attendee).
 
 ---
 
@@ -438,15 +489,11 @@ Ticket language is implementation-sized. "Build registration" is banned.
 
 ---
 
-### Phase 9 — Enterprise
+### Phase 9 — Enterprise / Dreamcast-class infrastructure
 
-**Epics:** WorkOS SSO; API keys; outbound webhooks; custom domain; retention job; audit UI; fine RBAC; DPA package.
+**Epics:** WorkOS SSO; API keys; outbound webhooks; custom domain; retention job; audit UI; fine RBAC; DPA package; **Stage 2** universal Eventsliner app (Discover + My Events + Tickets) if not already on web; **Stage 3** white-label only if a customer pays; hardware partners (ZPL/PDF badge, QZ Tray, offline batch, optional IDfy); **no** in-house FR.
 
----
-
-### Phase 10 — Hardware & identity
-
-**Epics:** ZPL/PDF badge; QZ Tray print; offline batch sync; printer runbook; optional IDfy; **no** in-house FR.
+**Do not** start Stage 3 native iOS+Android as the default path.
 
 ---
 

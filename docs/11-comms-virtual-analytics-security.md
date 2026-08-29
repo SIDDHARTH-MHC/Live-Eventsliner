@@ -26,8 +26,8 @@ Domain event
 |---------|----|----------|
 | Email | **Yes** | Resend or SES |
 | SMS | OTP yes; tickets no (cost) | MSG91 |
-| WhatsApp | Phase 4 | Gupshup or Interakt |
-| Push | Phase 7 | Web Push |
+| WhatsApp | Phase 5 | Gupshup or Interakt |
+| Push | Phase 5 | Web Push |
 | In-app inbox | Later | Own |
 
 ### 17.3 Trigger catalog
@@ -40,12 +40,12 @@ Domain event
 | `reminder.24h` | **Yes** | same + directions |
 | `reminder.1h` | Later | |
 | `event.published` (org) | Later | |
-| `session.starting` | Phase 5 | |
-| `schedule.changed` | Phase 5 | |
-| `event.completed` / feedback | Phase 4–5 | survey_url |
+| `session.starting` | Phase 6 | |
+| `schedule.changed` | Phase 6 | |
+| `event.completed` / feedback | Phase 5 | survey_url |
 | `waitlist.promoted` | When waitlist exists | |
 | `staff.invited` | Yes | login_url |
-| Campaign blast | Phase 4 | audience query |
+| Campaign blast | Phase 5 | audience query |
 
 Reminders: a scheduled job `SELECT events WHERE starts_at BETWEEN now+23h AND now+25h` and attendees confirmed not yet reminded. Store `Message` to be idempotent.
 
@@ -171,7 +171,7 @@ This platform will hold **attendee PII** and **payment metadata**. Security is n
 - OTP rate limits; lock phone after N failures
 - Session rotation on privilege change
 - Optional password with Argon2id if we add passwords
-- 2FA for org owners before they can export or refund (Phase 5; worth doing early)
+- 2FA for org owners before they can export or refund (soon after MVP; worth doing early)
 
 ### 20.2 Authorization / RBAC
 

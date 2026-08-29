@@ -46,6 +46,7 @@ The short-term goal is more precise: **run a real event end-to-end** — publish
 - Not Eventsliner Student
 - Not Eventsliner.org
 - Not a Dreamcast clone
+- Not a Luma clone
 - Not a request to start coding features
 - Not a plan to build facial recognition, proprietary video, payment processing, or hardware
 
@@ -156,6 +157,7 @@ Hosting should be India-region first (`ap-south-1` or equivalent) because this p
 |------|--------|
 | Research | Complete |
 | Product / engineering plan | Complete |
+| Discovery + three surfaces (plan) | **Documented** — [17](docs/17-discovery-and-surfaces.md); not in first 20 tasks |
 | Design system (Material 3 + HIG) | **Binding** — [16](docs/16-design-system.md), always-on Cursor rule |
 | Implementation | **Not started — by design** |
 | Eventsliner Student / .org connection | Explicitly out of scope |
