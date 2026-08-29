@@ -59,6 +59,8 @@ async function main() {
       venueName: "India Habitat Centre",
       city: "Delhi",
       visibility: "public",
+      category: "workshop",
+      tags: ["product", "startup", "delhi"],
       createdById: user.id,
     });
 

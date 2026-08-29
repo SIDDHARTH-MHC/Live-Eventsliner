@@ -27,10 +27,10 @@ export default async function HomePage() {
         </p>
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Button asChild size="lg">
-            <Link href="/auth/sign-in">Sign in</Link>
+            <Link href="/discover">Discover events</Link>
           </Button>
           <Button asChild variant="outline" size="lg">
-            <Link href="/auth/sign-in">Create organization</Link>
+            <Link href="/auth/sign-in">Sign in</Link>
           </Button>
         </div>
       </div>

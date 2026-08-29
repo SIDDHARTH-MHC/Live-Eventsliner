@@ -312,6 +312,8 @@ model Event {
   venueName       String?         @map("venue_name")
   venueAddress    String?         @map("venue_address")
   city            String?
+  category        String?
+  tags            String[]        @default([])
   capacity        Int?
   currency        String          @default("INR")
   modules         Json            @default("{}")
