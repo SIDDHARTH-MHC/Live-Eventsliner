@@ -2,6 +2,8 @@
 
 This repository is the **product and engineering plan** for Eventsliner.live.
 
+Canonical Git repository: https://github.com/SIDDHARTH-MHC/Live-Eventsliner.git
+
 It is **not** an application yet. No product code has been written. The work here reverse-engineers Dreamcast and the broader event-tech category, then defines the smallest architecture that can eventually compete with enterprise platforms — without copying every feature, and without connecting to Eventsliner Student / Eventsliner.org.
 
 ---
