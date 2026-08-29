@@ -91,6 +91,8 @@ Documented in [docs/CSRF.md](docs/CSRF.md).
 
 Product/engineering plan lives in [docs/](docs/). Start here for the engineering slice: [docs/15-start-here.md](docs/15-start-here.md).
 
+**Master roadmap (20 phases):** [docs/18-twenty-phase-master-roadmap.md](docs/18-twenty-phase-master-roadmap.md) — authoritative sequencing for 100% of planned scope.
+
 Implementation status: [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md)
 
 ## What is not in this slice

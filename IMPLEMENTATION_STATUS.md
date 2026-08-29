@@ -2,6 +2,33 @@
 
 Last updated: 2026-08-29
 
+## Twenty-phase roadmap summary
+
+Authoritative plan: [docs/18-twenty-phase-master-roadmap.md](docs/18-twenty-phase-master-roadmap.md). **Weighted completion ~70%** across all 20 phases.
+
+| # | Phase | Status |
+|---|-------|--------|
+| 1 | Foundations & design system | Done |
+| 2 | Organization, auth & tenancy | Done |
+| 3 | Event entity & website template | Done |
+| 4 | Registration engine | Done |
+| 5 | Ticketing & payments (Razorpay live) | Partial |
+| 6 | Credentials & attendee ticket | Done |
+| 7 | Check-in & staff operations | Done |
+| 8 | Communication engine | Partial |
+| 9 | Discovery platform | Done |
+| 10 | Organizer profiles & consumer IA | Partial |
+| 11 | Event PWA & attendee experience | Partial |
+| 12 | Sessions, speakers & agenda | Partial |
+| 13 | Networking & rule-based matchmaking | Partial |
+| 14 | Exhibitors, sponsors & lead capture | Partial |
+| 15 | Virtual & hybrid streaming | Partial |
+| 16 | Analytics, CRM & reporting | Partial |
+| 17 | Enterprise | Partial |
+| 18 | Security, compliance & scale hardening | Partial |
+| 19 | Production deploy, observability & DR | Partial |
+| 20 | Partner hardware, offline, identity & apps | Partial |
+
 ## Phases 0–2
 
 See git history. Phase 2 merged @ adeb6c0: registration, ticketing, Razorpay mock, attendee materialization.
