@@ -12,13 +12,15 @@ Tenant rule: almost every row has `org_id` and/or `event_id`. Queries always fil
 
 ### Keep for v1
 
-`User`, `Organization`, `Membership`, `Event`, `Venue` (can be columns on Event at first, promote when multi-venue appears), `EventSite`, `TicketType`, `InventoryHold`, `Registration`, `Attendee`, `Order`, `Payment`, `Refund`, `Coupon` (table now, UI later — optional), `Credential`, `CheckIn`, `Message`, `MessageTemplate`, `Media`, `AnalyticsEvent`, `AuditLog`, `EventStaff`, `ConsentRecord`.
+`User`, `Organization`, `Membership`, `Event`, `Venue` (can be columns on Event at first, promote when multi-venue appears), `EventSite` (v1 table `event_sites`; product concept **Event Experience**), `TicketType`, `InventoryHold`, `Registration`, `Attendee`, `Order`, `Payment`, `Refund`, `Coupon` (table now, UI later — optional), `Credential`, `CheckIn`, `Message`, `MessageTemplate`, `Media`, `AnalyticsEvent`, `AuditLog`, `EventStaff`, `ConsentRecord`.
 
 `Invoice` — include if we charge INR. Minimum viable: store Razorpay payment id + tax snapshot; PDF can wait one sprint after first paid event.
 
+Visibility (`public` | `unlisted` | `private`) lives on **Event from v1**. Discovery metadata (city, geo, category, tags, price, online, starts_at) lives on Event / Venue / TicketType from v1 even though `/discover` is Phase 4. Do not add a `listings` table.
+
 ### Promote from fields to tables when needed
 
-`EventDate`, `Track`, `Session`, `Speaker`, `Sponsor`, `Exhibitor`, `Booth`, `Lead`, `Meeting`, `Connection`, `NetworkingProfile`, `AccessRule`, `Zone`, `BadgeTemplate`, `BadgePrint`, `Device`, `Survey`, `Poll`, `Question`, `Answer`, `Stream`, `Recording`, `ApiKey`, `Webhook`, `Invitation`.
+`EventDate`, `Track`, `Session`, `Speaker`, `Sponsor`, `Exhibitor`, `Booth`, `Lead`, `Meeting`, `Connection`, `NetworkingProfile`, `AccessRule`, `Zone`, `BadgeTemplate`, `BadgePrint`, `Device`, `Survey`, `Poll`, `Question`, `Answer`, `Stream`, `Recording`, `ApiKey`, `Webhook`, `Invitation`, `Follow` (user follows organization — Phase 4+), `event_experience` / `event_app_config` (evolve from `event_sites`, do not create in first 20).
 
 ### Drop or delay from the suggested list
 
@@ -49,12 +51,13 @@ Tenant rule: almost every row has `org_id` and/or `event_id`. Queries always fil
 
 ### Organization
 
-- **Purpose:** Tenant. Owns events and branding. Billing customer.
+- **Purpose:** Tenant. Owns events and branding. Billing customer. **Later:** public organizer profile for discovery.
 - **Fields:** `id`, `name`, `slug` unique, `logo_media_id`, `primary_color`, `support_email`, `support_phone`, `gstin`, `billing_address` JSONB, `country`, `timezone`, `status`, `created_at`.
-- **Relationships:** memberships, events, later API keys.
+- **Public profile (Phase 4 — columns can exist earlier, UI later):** `public_name` (default `name`), `bio`, `website_url`, `city`, `is_public_profile` (bool; default true when they have any published PUBLIC event). Do not invent a parallel `hosts` table.
+- **Relationships:** memberships, events, later API keys, later `follows`.
 - **Ownership:** org owner role.
 - **Lifecycle:** trial → active → suspended → closed.
-- **Permissions:** members by role.
+- **Permissions:** members by role. Public read of profile + PUBLIC events only when Phase 4 ships.
 - **Indexes:** unique slug.
 - **Constraints:** slug `[a-z0-9-]`.
 
@@ -67,25 +70,40 @@ Tenant rule: almost every row has `org_id` and/or `event_id`. Queries always fil
 
 ### Event
 
-- **Purpose:** Root aggregate for one happening.
+- **Purpose:** Root aggregate for one happening. **Canonical object** for discovery, website, and app — not a listing, not a microsite row, not an app config.
 - **Fields:** `id`, `org_id`, `title`, `slug` (unique per org; globally unique public slug recommended), `type` enum, `status` (`draft` \| `published` \| `cancelled` \| `completed` \| `archived`), `visibility` (`public` \| `unlisted` \| `private`), `description`, `timezone`, `starts_at`, `ends_at`, `venue_id` nullable, `capacity` nullable, `currency` default `INR`, `modules` JSONB, `attendance_modes` (`in_person` \| `virtual` \| `hybrid`), `cover_media_id`, `created_by`, `published_at`, `created_at`, `updated_at`.
-- **Relationships:** org, ticket_types, registrations, attendees, site, staff.
+- **Visibility (MUST — product + domain, day one):**
+  - **PUBLIC** — anyone can open `/e/:slug`; **and** the event is a discovery object once published (search, browse, city pages). Organizers opt *out* by changing visibility.
+  - **UNLISTED** — anyone with the link can view the website; **not** in `/discover`, search, or browse.
+  - **PRIVATE** — invite / permission only; not in marketplace.
+- **Discovery metadata (store on Event/Venue/tickets now; query in Phase 4):**
+  | Need | Source |
+  |------|--------|
+  | Location / city | `Venue.city` or v1 shortcut `Event.city` (India: Delhi, Bengaluru, …) |
+  | Geo | `Venue.lat`, `Venue.lng` |
+  | Category | `Event.type` and/or `Event.category` (if type is too coarse, add category later — do not fork) |
+  | Tags | `Event.tags` text[] (optional v1 column; empty ok) |
+  | `price_min` | Derived from public `TicketType.price_cents` (denormalize on publish if queries need it) |
+  | `is_online` | Derived from `attendance_modes` containing `virtual` |
+  | `starts_at` / `ends_at` | Already on Event |
+- **Relationships:** org, ticket_types, registrations, attendees, site (experience), staff.
 - **Ownership:** org.
 - **Lifecycle:** see status. Published events with payments cannot hard-delete.
-- **Permissions:** org admin+ configure; public read if published+public.
-- **Indexes:** `(org_id, starts_at)`, unique `public_slug`, `(status, starts_at)`, `(org_id, slug)`.
-- **Constraints:** `ends_at >= starts_at`; slug unique.
+- **Permissions:** org admin+ configure; public read of website if published and (public or unlisted); discovery read **only** if published **and** public.
+- **Indexes:** `(org_id, starts_at)`, unique `public_slug`, `(status, starts_at)`, `(org_id, slug)`, **`(status, visibility, starts_at)`** (discovery), `(city, starts_at)` when city is a column.
+- **Constraints:** `ends_at >= starts_at`; slug unique. Default visibility is [D16](DECISIONS.md).
 
 ### Venue
 
 - **Purpose:** Physical place. Reusable later across events.
 - **Fields:** `id`, `org_id`, `name`, `address_line1`, `city`, `state`, `postal_code`, `country`, `lat`, `lng`, `notes`, `map_url`.
-- **v1 shortcut:** nullable columns on `Event` until a second venue appears. Promote without changing public API.
+- **v1 shortcut:** nullable columns on `Event` until a second venue appears (`city` still required for India-first discovery later — store city even in the shortcut). Promote without changing public API.
 - **Indexes:** `(org_id)`.
 
-### EventSite
+### EventSite (v1 table `event_sites`) — Event Experience
 
-- **Purpose:** Configurable public page.
+- **Purpose:** Configurable **Event Experience**. In v1 this **is** the branded public website. The same concept later powers mobile web/PWA, the in-event slice of the universal app, and white-label apps. **Do not** create a second `event_apps` CMS in v1.
+- **Product name:** Event Experience. **Table name v1:** `event_sites` (keep). **Later:** `event_experience` (rename or 1:1 successor) and `event_app_config` (tabs, install, white-label flags) — not in the first 20 tasks.
 - **Fields:** `id`, `event_id` unique, `template_id`, `theme` JSONB (colors, logo), `sections` JSONB (ordered list of `{type, visible, data}`), `seo` JSONB, `custom_domain` nullable later, `published_version`.
 - **Ownership:** event.
 - **Lifecycle:** always exists (created with event).
@@ -271,6 +289,15 @@ These three profile tables **are the AI feature store**. Do not invent a paralle
 
 - `Invitation(event_id, email/phone, ticket_type_id, token_hash, status, expires_at)`
 
+### Follow (Phase 4+)
+
+- `Follow(user_id, org_id, created_at)` unique pair. Powers consumer **Following**. Not in MVP / first 20.
+
+### Event Experience successor (do not create in v1)
+
+- Keep writing to `event_sites`.
+- Later: `event_experience` 1:1 with `event_id` (or rename) and `event_app_config(event_id, tabs JSON, pwa_enabled, white_label JSON)`. Same Event. Not a second product.
+
 ### APIKey / Webhook
 
 - `ApiKey(org_id, prefix, hash, scopes, last_used_at)`
@@ -284,7 +311,7 @@ These three profile tables **are the AI feature store**. Do not invent a paralle
 | Entity | Create | Read | Update | Delete |
 |--------|--------|------|--------|--------|
 | Organization | any signed-in user | members | owner/admin | owner (soft) |
-| Event | org admin+ | public if published; else members/staff | org admin+ / event manager | never if paid; archive |
+| Event | org admin+ | website: published+public or unlisted (link); discovery: published+public only; else members/staff | org admin+ / event manager | never if paid; archive |
 | TicketType | event manager+ | public list if public | manager+ | if sold=0 |
 | Registration | anyone (public form) or staff | owner attendee, org staff | limited | cancel |
 | Attendee | system / staff | org staff; self | org registration role | no |
@@ -322,10 +349,11 @@ These three profile tables **are the AI feature store**. Do not invent a paralle
 ```
 Organization 1──* Event 1──* TicketType
      │              │
-     *              ├── 1 EventSite
-Membership          ├── * Registration *──1 Order *──* Payment
-     │              ├── * Attendee 1──1 Credential
-    User            │         └── * CheckIn
+     *              ├── 1 EventSite          (Experience / event_sites)
+Membership          ├── visibility ────────── published+PUBLIC → Discovery projection
+     │              ├── * Registration *──1 Order *──* Payment
+    User            ├── * Attendee 1──1 Credential
+                    │         └── * CheckIn
                     ├── * EventStaff ── User
                     └── * AnalyticsEvent
 ```

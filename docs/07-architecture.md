@@ -8,7 +8,7 @@ Start small. Scale the **model**, not the number of repos.
 
 | Layer | Choice | Why |
 |-------|--------|-----|
-| Frontend + BFF | Next.js App Router, TypeScript | One app for public pages, dashboards, check-in |
+| Frontend + BFF | Next.js App Router, TypeScript | One app for discovery, public event websites, dashboards, check-in |
 | UI | Tailwind + shadcn/ui | Fast, consistent, no second component library. **Tokens and usage MUST follow [16-design-system.md](16-design-system.md)** (Material 3 + Apple HIG). |
 | Auth | First-party sessions (Better Auth or Lucia-style) + OTP | India phone login; avoid Clerk lock-in for PII |
 | DB | PostgreSQL 16 | Transactions, inventory, constraints |
@@ -30,18 +30,31 @@ Start small. Scale the **model**, not the number of repos.
 
 ## 7.2 Frontend surfaces
 
-| Surface | Audience | v1 | Notes |
-|---------|----------|----|-------|
-| **Public event pages** | Anyone | Yes | SSR/SSG + revalidate. Fast on 4G. |
+Three **consumer** surfaces are interfaces on **Event**, not three apps. Detail: [17-discovery-and-surfaces.md](17-discovery-and-surfaces.md).
+
+```
+EVENTSLINER.LIVE
+       │
+┌──────┼──────┐
+│      │      │
+DISCOVERY   EVENT WEBSITE   EVENT APP
+/discover      /e/:slug     event experience
+```
+
+| Surface | Audience | v1 / first 20 | Notes |
+|---------|----------|---------------|-------|
+| **Discovery** (`/discover`) | Anyone (consumer) | **No** — Phase 4 | Search, city browse (Delhi first), rails, organizer profiles. Same `events` rows. |
+| **Public event website** (`/e/:slug`) | Anyone with access by visibility | **Yes** | SSR/SSG + revalidate. Branded Event Experience, not a generic Eventsliner skin. Fast on 4G. |
 | **Public checkout / register** | Attendee | Yes | Authenticated-or-guest. Mobile-first. |
-| **Attendee ticket page** | Attendee | Yes | Big QR, add-to-wallet later |
+| **Attendee ticket / event PWA** | Attendee | Ticket page yes; full PWA Phase 5 | Stage 1 after register: My Pass, then schedule/speakers as data exists. |
+| **Universal Eventsliner app** | Consumer + attendee | **No** | Stage 2: Discover + My Events + Tickets, then tap into event experience. After Phase 4. |
+| **White-label event app** | Large enterprise | **No** | Stage 3, Phase 9+. |
 | **Organizer dashboard** | Owner/manager | Yes | Events, attendees, money, live counts |
 | **Check-in interface** | Staff | Yes | Separate layout. No chrome from the dashboard. Installable PWA. |
 | **Event staff home** | Staff | Yes | Event picker → check-in |
 | **Platform admin** | Us | Thin | Even a protected `/internal` is enough |
-| **Exhibitor dashboard** | Exhibitors | No | Phase 6 |
-| **Speaker portal** | Speakers | No | Phase 5+ |
-| **Event app (PWA)** | Attendees | Ticket page only | Phase 7 expands |
+| **Exhibitor dashboard** | Exhibitors | No | Phase 7 |
+| **Speaker portal** | Speakers | No | Phase 6+ |
 
 Responsive: organizer dashboard usable on tablet; **check-in designed for phone first**; public pages phone first.
 
@@ -69,8 +82,9 @@ All HTTP in Next.js Route Handlers or a single `apps/api` Hono server next to th
 |--------|----------------|
 | Authentication | Sessions, OTP, password optional |
 | Authorization | `can()` |
-| Event | CRUD, status, modules |
-| Site | Render config |
+| Event | CRUD, status, visibility, modules |
+| Site / Experience | Render `event_sites`; later app config |
+| Discovery | **Phase 4.** Public search/browse; not a second Event store |
 | Registration | State machine, forms |
 | Ticketing | SKUs, holds, inventory |
 | Payments | Razorpay adapter, webhooks |
@@ -80,7 +94,7 @@ All HTTP in Next.js Route Handlers or a single `apps/api` Hono server next to th
 | Communications | Templates, queue |
 | Analytics | Ingest, aggregates |
 | Media | Upload URLs, variants |
-| Search | SQL first |
+| Search | SQL first (attendees MVP; public events Phase 4) |
 | Integrations | Provider webhooks in |
 
 Networking / exhibitors / sessions join as modules later.
@@ -114,7 +128,7 @@ Networking / exhibitors / sessions join as modules later.
 | Queue | BullMQ | Same, more queues |
 | Object storage | One bucket, path prefix per org | Separate public/private buckets |
 | CDN | Cache public GETs | Image resizing |
-| Search | `ILIKE` + trigram | Typesense if attendee search lags |
+| Search | `ILIKE` + trigram (attendees); public event index Phase 4 | Typesense if discovery or attendee search lags |
 | Realtime | Postgres counts + 3s poll on check-in dashboard | SSE or Redis pubsub |
 | Logging | JSON request id | Better sampling |
 | Monitoring | Host metrics + Sentry | Uptime on `/health` and Razorpay webhook lag |
@@ -189,8 +203,19 @@ Public vs private:
 ### Site
 - `GET /events/:eventId/site`
 - `PUT /events/:eventId/site`
-- `GET /public/events/:slug` — page payload
+- `GET /public/events/:slug` — **event website** payload (not discovery)
 - `GET /public/events/:slug/tickets`
+
+### Discovery (Phase 4 — do not build in first 20)
+
+Same Event rows. `status=published` AND `visibility=public` only.
+
+- `GET /public/discover?q=&city=&date=&category=&price=&type=` — keyword + filters
+- `GET /public/discover/rails/:name` — `trending` \| `near` \| `weekend` \| `popular` \| `new` \| `free` \| `online`
+- `GET /public/orgs/:orgSlug` — organizer public profile + their PUBLIC events
+- `POST /me/follows/:orgId` / `DELETE` — following (later within Phase 4+)
+
+Event card is a projection: website URL, organizer, sessions, tickets, related events. No recommendation-AI endpoint initially.
 
 ### Tickets
 - `GET/POST /events/:eventId/ticket-types`
@@ -254,4 +279,4 @@ Public vs private:
 
 ## 8.7 Why not GraphQL in v1
 
-The surfaces are known and few. REST + RSC data loaders are enough. Revisit if a mobile native client and a partner ecosystem appear (Phase 9).
+The surfaces are known and few. REST + RSC data loaders are enough. Revisit if a **universal native** client and a partner ecosystem appear (Stage 2–3 / Phase 9). Discovery stays REST list/filter, not a separate GraphQL graph.

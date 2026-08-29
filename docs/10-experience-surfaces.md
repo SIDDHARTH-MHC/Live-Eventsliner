@@ -1,17 +1,45 @@
 # 13–16. Event website, app, networking, exhibitors, virtual/hybrid
 
+**Event is the canonical object. Discovery, event website, and event app are interfaces on that object, not separate products.** Full diagrams and the discovery engine: [17-discovery-and-surfaces.md](17-discovery-and-surfaces.md).
+
+```
+EVENTSLINER.LIVE
+       │
+┌──────┼──────┐
+│      │      │
+DISCOVERY   EVENT WEBSITE   EVENT APP
+/discover      /e/:slug     event-specific experience
+```
+
+Do not build these as independent systems. v1 table for the branded experience remains `event_sites` (Event Experience). Discovery is Phase 4, not MVP.
+
+---
+
+## 12b. Discovery home (Phase 4 — document now, do not build in first 20)
+
+Consumer entry to the **network**. India-first, **city-first** (example: this weekend in Delhi).
+
+| Piece | What |
+|-------|------|
+| **Home** | Rails: trending, near you, this weekend, popular, new, free, online |
+| **Discover** | Search: keyword, location, date, category, price, event type |
+| **Calendar / My Tickets / Following** | Eventually; Following = organizer profiles |
+| **Event card** | Links to `/e/:slug`; organizer; sessions; tickets; related events |
+
+Only **published PUBLIC** events. No recommendation AI initially. Organizer public profiles are part of this surface.
+
 ---
 
 ## 13. Event website builder
 
-Dreamcast microsites are branded and functional, not Webflow. Luma pages are tasteful and fast. Eventsliner should land on **Luma quality with Dreamcast data bindings**.
+Dreamcast microsites are branded and functional, not Webflow. Luma pages are tasteful and fast. Eventsliner should land on **Luma quality with Dreamcast data bindings**. The page at `/e/:slug` is the **event website**, not the discovery marketplace (START HERE task 18).
 
 ### 13.1 Recommendation: staged builder
 
 | Stage | What | When |
 |-------|------|------|
 | **1. Fixed templates** | 2–3 templates, tokens for color/logo/cover, on/off sections | **MVP** |
-| **2. Block-based** | Ordered sections, each with a schema editor (not freeform pixels) | Phase 5 |
+| **2. Block-based** | Ordered sections, each with a schema editor (not freeform pixels) | Phase 6 |
 | **3. Drag-and-drop** | Pixel canvas, arbitrary layout | **Only if** agencies pay. High cost, high bugs. |
 
 **Do not start at 3.** Almost every "event website builder" that starts as a page designer ships late and looks generic anyway.
@@ -38,7 +66,7 @@ One excellent conference template is better than five mediocre ones.
 | Speakers | Later | Empty = hidden |
 | Schedule | Later | |
 | Sponsors | Optional if logos uploaded | |
-| Exhibitors | Phase 6 | |
+| Exhibitors | Phase 7 | |
 | Custom markdown block | Yes (one) | Escape hatch |
 | Custom HTML | Later, sanitised | XSS risk |
 
@@ -53,7 +81,7 @@ Later: fonts, dark/light, custom CSS (enterprise, sanitised).
 | Option | When |
 |--------|------|
 | `eventsliner.live/e/:org/:slug` or `/e/:slug` | **MVP** |
-| `:slug.eventsliner.live` | Phase 5 (wildcard cert) |
+| `:slug.eventsliner.live` | Phase 6 (wildcard cert) |
 | Custom domain CNAME | Enterprise (SSL provisioning, apex issues) |
 
 Organizers care more about **unbranded chrome** (no giant Eventsliner banner) than about a custom domain on day one. Follow Dreamcast: disappear behind their brand.
@@ -74,32 +102,41 @@ Design public pages at 390px width first. Sticky register CTA. Tickets must be t
 
 ---
 
-## 14. Event app
+## 14. Event app (staged)
+
+Users do **not** download 15 event apps. Native iOS + Android + website builder + discovery + Dreamcast hardware **at once** is the explosion failure mode.
 
 ### 14.1 Decision
 
 | Option | Speed | Cost | Capability | Verdict |
 |--------|-------|------|------------|---------|
 | Responsive website | Fast | Low | High enough for ticket + schedule | **MVP (ticket page)** |
-| **PWA** | Fast | Low–med | Offline ticket, install, later push | **Phase 7 default app** |
-| Native iOS | Slow | High | Push reliability, store presence | After PWA proof |
-| Native Android | Slow | High | Same | After PWA proof |
+| **Stage 1: Event PWA** | Fast | Low–med | After register: My Pass, Schedule, Speakers, Exhibitors, Networking, Notifications, Venue; add to home screen | **Phase 5 attendee experience** (empty tabs hidden) |
+| **Stage 2: Universal Eventsliner app** | Med | Med | Discover, My Events, Tickets, tap into event experience | **After Phase 4 discovery** |
+| **Stage 3: White-label enterprise app** | Slow | High | Dreamcast-like store listing per large customer | **Phase 9+, much later** |
+| Native iOS / Android as v1 | Slow | High | Store presence | **Do not start here** |
 
-**Recommendation:** do not build native apps first. Dreamcast's "white-label app" is often a services project. Whova wins because of store presence and push — we can get 80% with a PWA and WhatsApp, which India actually reads.
+**Recommendation:** do not build native apps first. Dreamcast's "white-label app" is often a services project. Whova wins because of store presence and push — we can get 80% with a PWA and WhatsApp, which India actually reads. Stage 2 is one Eventsliner app, not 15 event apps.
 
-### 14.2 App information architecture (Phase 7)
+### 14.2 App information architecture
+
+**Stage 1 (event PWA — Phase 5)**
 
 | Tab | Contents |
 |-----|----------|
-| Home | Now/next session, announcements |
-| Schedule | Tracks, my agenda |
-| Speakers | Profiles |
-| Exhibitors | Directory + booth |
-| Ticket | QR, badge, order |
-| People | Networking (if on) |
-| More | Venue, Wi-Fi, FAQ, surveys |
+| My Pass | QR, badge, order |
+| Schedule | Tracks, my agenda (when sessions exist — Phase 6) |
+| Speakers | Profiles (when CMS exists) |
+| Exhibitors | Directory + booth (Phase 7) |
+| Networking | If on (Phase 6) |
+| Notifications | Announcements (comms engine Phase 5) |
+| Venue | Address, map, Wi-Fi |
 
-MVP ships only **Ticket** (and the public site). Adding empty tabs is worse than not having an app.
+MVP ships only **Ticket / My Pass** (and the public site). Adding empty tabs is worse than not having an app.
+
+**Stage 2 (universal app)** — consumer IA: Home, Discover, Calendar, My Tickets, Following; then drill into Stage 1 experience for one Event.
+
+**Stage 3** — same Event Experience, white-label chrome and store listing. `event_app_config` later; still one Event.
 
 ### 14.3 Features vs phase
 
@@ -107,14 +144,18 @@ MVP ships only **Ticket** (and the public site). Adding empty tabs is worse than
 |---------|-------|
 | My ticket / QR | 1 (MVP) |
 | Venue info | 1 on public site |
-| Schedule / speakers | 5 |
-| Notifications (email/WA) | 1 / 4 |
-| Personalized agenda | 5–7 |
-| Polls / Q&A | 7 (or Slido link) |
-| Surveys | 4–5 |
-| Networking | 6–7 |
-| Push (PWA) | 7 |
-| Native | 10 if ever |
+| Discovery / search / organizer profiles | **4** |
+| Notifications (email/WA) | 2–3 / **5** |
+| Event PWA shell (Stage 1) | **5** |
+| Schedule / speakers | **6** |
+| Personalized agenda | 6–5 overlap |
+| Networking | **6** |
+| Polls / Q&A | 6 (or Slido link) |
+| Surveys | **5** |
+| Exhibitors | **7** |
+| Push (PWA) | 5 |
+| Universal app (Stage 2) | After 4 |
+| White-label native (Stage 3) | **9** if ever |
 
 ---
 
@@ -163,7 +204,7 @@ Speed networking (Dreamcast) is an ops format. Software only needs a timer + rot
 
 ---
 
-## 16. Exhibitor system (Phase 6)
+## 16. Exhibitor system (Phase 7)
 
 Dreamcast's expo value is **pass allocation + lead retrieval + on-site**. Copy that sequence, not the 3D booth.
 

@@ -4,7 +4,7 @@ This repository is the **product and engineering plan** for Eventsliner.live.
 
 Canonical Git repository: https://github.com/SIDDHARTH-MHC/Live-Eventsliner.git
 
-It is **not** an application yet. No product code has been written. The work here reverse-engineers Dreamcast and the broader event-tech category, then defines the smallest architecture that can eventually compete with enterprise platforms — without copying every feature, and without connecting to Eventsliner Student / Eventsliner.org.
+It is **not** an application yet. No product code has been written. The work here reverse-engineers Dreamcast and the broader event-tech category, then defines **one Event entity** with three interfaces (discovery, event website, event app) — without copying every competitor feature, and without connecting to Eventsliner Student / Eventsliner.org.
 
 ## Always-on constraint: design system
 
@@ -21,9 +21,25 @@ Taste bar remains Luma-quality public pages ([D13](docs/DECISIONS.md)). That mea
 
 ## What Eventsliner.live is
 
-Eventsliner.live is a new, independent event technology platform. The long-term goal is a comprehensive system that can run meetups, conferences, workshops, exhibitions, festivals, corporate events, sports events, webinars, and hybrid events on **one core**.
+Eventsliner.live is **both**:
 
-The short-term goal is more precise: **run a real event end-to-end** — publish a branded event page, collect registrations, take payment, issue a QR credential, check people in, and show the organizer what happened.
+- A **public event network / discovery marketplace** (Luma)
+- An **event operating system** (Dreamcast)
+
+Those are **not two products** and **not three backends**. They are three **interfaces on one Event**:
+
+```
+EVENTSLINER.LIVE
+       │
+┌──────┼──────┐
+│      │      │
+DISCOVERY   EVENT WEBSITE   EVENT APP
+eventsliner.live/discover   /e/:slug   event-specific experience
+```
+
+The long-term goal is to run meetups, conferences, workshops, exhibitions, festivals, corporate events, sports events, webinars, and hybrid events on **that one core**, and to let **published PUBLIC** events be found (Delhi-first city browse, then more of India).
+
+The short-term goal is more precise: **run a real event end-to-end** — publish a branded event website, collect registrations, take payment, issue a QR credential, check people in, and show the organizer what happened. **Discovery is a first-class later capability**, not part of the first 20 engineering tasks. Canonical write-up: [17. Discovery and surfaces](docs/17-discovery-and-surfaces.md).
 
 ## What this is not
 
@@ -33,7 +49,7 @@ The short-term goal is more precise: **run a real event end-to-end** — publish
 - Not a request to start coding features
 - Not a plan to build facial recognition, proprietary video, payment processing, or hardware
 
-Dreamcast is the reference competitor because it is the strongest India-first *end-to-end event execution* company. That does not mean Eventsliner should become a hardware-and-ops company. Dreamcast's moat is on-ground execution at mega scale. Eventsliner's opening is **self-serve software** that is India-native and architected so enterprise / on-ground capability can be added later.
+Eventsliner is **not a clone of Luma and not a clone of Dreamcast.** Luma is the reference for network, taste, and discovery. Dreamcast is the reference for India-first *end-to-end event execution*. Eventsliner should not become a hardware-and-ops company; Dreamcast's moat is on-ground execution at mega scale. The opening is **self-serve software**: a Luma-quality public network **and** a Dreamcast-class OS path, India-native, on one Event.
 
 ## How to read this plan
 
@@ -41,25 +57,30 @@ Start with the executive thesis, then the capability map, then the core platform
 
 | # | Document | What it answers |
 |---|----------|-----------------|
-| 0 | [Executive thesis](docs/00-executive-thesis.md) | What Dreamcast actually is, and what Eventsliner should and should not become |
+| 0 | [Executive thesis](docs/00-executive-thesis.md) | Luma network + Dreamcast OS, flywheel, three surfaces, what not to copy |
 | 1 | [Dreamcast research](docs/01-dreamcast-research.md) | Product offering, positioning, software vs hardware vs ops |
 | 2 | [Capability map](docs/02-capability-map.md) | Full Dreamcast-class capability tree with MVP / later / integrate decisions |
 | 3 | [Competitive analysis](docs/03-competitive-analysis.md) | Dreamcast, Luma, Eventbrite, Cvent, Bizzabo, Hopin/RC Events, Whova, Airmeet, India peers |
-| 4 | [Core platform](docs/04-core-platform.md) | Foundational systems and dependency graph |
+| 4 | [Core platform](docs/04-core-platform.md) | Foundational systems, Event Experience, Event → published → discoverability |
 | 5 | [Domain & data model](docs/05-domain-model.md) | Entities, fields, relationships, indexes, storage choices |
 | 6 | [Users & permissions](docs/06-users-permissions.md) | Roles, journeys, permission matrix |
 | 7 | [System & API architecture](docs/07-architecture.md) | Frontend surfaces, backend, infra, APIs |
 | 8 | [Registration & payments](docs/08-registration-payments.md) | Registration engine, tickets, Razorpay, refunds |
 | 9 | [Check-in & badges](docs/09-checkin-badges.md) | Credentials, QR, scanners, badge/hardware plan |
-| 10 | [Website, app, networking, exhibitors](docs/10-experience-surfaces.md) | Event site builder, PWA, matchmaking, exhibitor portal |
+| 10 | [Website, app, networking, exhibitors](docs/10-experience-surfaces.md) | Event website, PWA vs universal vs white-label, discovery home, matchmaking, exhibitors |
 | 11 | [Comms, virtual, analytics, security](docs/11-comms-virtual-analytics-security.md) | Communication engine, streaming, analytics, enterprise, security |
 | 12 | [Integrations](docs/12-integrations.md) | Build vs buy table, India-first providers |
 | 13 | [MVP, roadmap, tickets](docs/13-mvp-roadmap-tickets.md) | Brutally small MVP, phases, epics, implementation tickets |
 | 14 | [Prioritization, risks, decisions](docs/14-prioritization-risks-decisions.md) | P0–P3, MUST/SHOULD/LATER/INTEGRATE, risks, open decisions |
 | 15 | [START HERE](docs/15-start-here.md) | First 20 engineering tasks after plan approval |
 | 16 | [Design system](docs/16-design-system.md) | Permanent Material 3 + Apple HIG system; tokens, a11y, surfaces |
+| 17 | [Discovery and surfaces](docs/17-discovery-and-surfaces.md) | Luma + Dreamcast on one Event; visibility; discovery engine (Phase 4, not MVP) |
 
-## Product principle
+## Product principles
+
+**Event is the canonical object. Discovery, event website, and event app are interfaces on that object, not separate products.**
+
+**Every published public event is both an event website and a potential discovery object. Eventsliner.live must treat event discovery as a first-class platform capability, while allowing organizers to opt out through visibility settings.**
 
 Do not create separate backends for different event types.
 
@@ -77,6 +98,14 @@ Event
 ```
 
 Event type is configuration and UI, not infrastructure.
+
+Visibility on that same Event (must be in the domain model from day one):
+
+| Visibility | Website `/e/:slug` | Discovery `/discover` |
+|------------|--------------------|------------------------|
+| **PUBLIC** | Anyone | Yes, once published |
+| **UNLISTED** | Anyone with the link | No |
+| **PRIVATE** | Invite / permission only | No |
 
 ## Recommended first architecture (after approval)
 
@@ -119,6 +148,7 @@ Hosting should be India-region first (`ap-south-1` or equivalent) because this p
 | 29 | Decisions before coding | [14](docs/14-prioritization-risks-decisions.md), [DECISIONS.md](docs/DECISIONS.md) |
 | 30 | Recommended first sprint | [15](docs/15-start-here.md) |
 | 31 | Design system (always on) | [16](docs/16-design-system.md), [.cursor/rules/design-system.mdc](.cursor/rules/design-system.mdc) |
+| 32 | Discovery + three surfaces | [17](docs/17-discovery-and-surfaces.md), also [04](docs/04-core-platform.md), [10](docs/10-experience-surfaces.md) |
 
 ## Status
 

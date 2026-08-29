@@ -27,6 +27,7 @@ Event Platform
 ├── Identity & Access
 ├── Organizations
 ├── Event Creation & Configuration
+├── Discovery (network / marketplace)
 ├── Event Website
 ├── Registration
 ├── Ticketing
@@ -150,11 +151,11 @@ Event Platform
 ## 2.3 Event Creation & Configuration
 
 ### 2.3.1 Event entity
-- **Does:** Canonical event: title, type, timezone, status, visibility.
+- **Does:** Canonical event: title, type, timezone, status, visibility. Root for **website, app, and discovery** — not a listing clone.
 - **Who:** Organizer.
-- **Why:** Root object for every other module.
+- **Why:** Root object for every other module. **Event is the canonical object. Discovery, event website, and event app are interfaces on that object, not separate products.**
 - **Flow:** Create → draft → configure → publish → live → completed → archived.
-- **Data:** `Event` (type enum, status, starts_at, ends_at, timezone, visibility).
+- **Data:** `Event` (type enum, status, starts_at, ends_at, timezone, visibility, city/tags as discovery metadata).
 - **BE:** Status state machine; no deletes of published events with orders.
 - **FE:** Create wizard, settings.
 - **API:** `CRUD /events`.
@@ -187,28 +188,36 @@ Event Platform
 - **Horizon:** MVP. **Cx:** M. **Pri:** P0.
 
 ### 2.3.5 Publish / unpublish
-- **Does:** Public URL goes live; draft stays private.
+- **Does:** Public URL (`/e/:slug`) goes live; draft stays private. This is the **event website**, not the marketplace.
 - **Who:** Organizer.
 - **Why:** Incomplete events must not be joinable.
 - **Sec:** Unpublish must not void paid tickets silently.
 - **Horizon:** MVP. **Cx:** S. **Pri:** P0.
+
+### 2.3.6 Visibility (PUBLIC / UNLISTED / PRIVATE)
+- **Does:** PUBLIC — anyone can discover (once published). UNLISTED — link works; not in marketplace. PRIVATE — invite/permission only.
+- **Who:** Organizer.
+- **Why:** **Every published public event is both an event website and a potential discovery object.** Organizers opt out through visibility, not a second product.
+- **Data:** `Event.visibility`. Default is [D16](DECISIONS.md).
+- **Horizon:** Field in MVP schema. Discovery *consumption* Phase 4. **Cx:** S. **Pri:** P0 (field) / P1 (marketplace).
+- **See:** [17-discovery-and-surfaces.md](17-discovery-and-surfaces.md).
 
 ---
 
 ## 2.4 Event Website
 
 ### 2.4.1 Public event page
-- **Does:** Branded, mobile-first page: hero, about, tickets, venue, FAQ.
-- **Who:** Prospective attendees.
-- **Why:** Discovery and conversion. This *is* the product for many organizers.
+- **Does:** Branded, mobile-first **event website**: hero, about, tickets, venue, FAQ.
+- **Who:** Prospective attendees (from a link **or**, later, from discovery).
+- **Why:** Conversion on `/e/:slug`. This *is* the product for many organizers. Discovery is a **separate interface** on the same Event.
 - **Flow:** Open URL → decide → register.
-- **Data:** `EventSite`, section content, media.
+- **Data:** `event_sites` (Event Experience), section content, media.
 - **BE:** Public read API, CDN cache.
 - **FE:** Template renderer.
 - **API:** `GET /public/events/:slug`.
 - **Deps:** Event, Tickets, Media.
 - **3P:** CDN, image optimizer.
-- **Sec:** No PII on public page.
+- **Sec:** No PII on public page. `robots` for unlisted/private.
 - **Horizon:** MVP (one excellent template). **Cx:** M. **Pri:** P0.
 
 ### 2.4.2 Section library
@@ -231,7 +240,48 @@ Event Platform
 - **Does:** Full visual builder.
 - **Horizon:** **Do not build** until templates + block config are proven. **Cx:** XL. **Pri:** P3.
 
-Website architecture is expanded in [10-experience-surfaces.md](10-experience-surfaces.md).
+Website architecture is expanded in [10-experience-surfaces.md](10-experience-surfaces.md). `/e/:slug` is the website, not `/discover`.
+
+---
+
+## 2.4A Discovery (network / marketplace)
+
+**Horizon: Phase 4.** Modeled now. **Not MVP. Not first 20 tasks.** Same `events` table. India-first, city-first (Delhi example).
+
+### 2.4A.1 Public event search
+- **Does:** Keyword, location, date, category, price, event type.
+- **Who:** Discovery visitor (not yet an attendee).
+- **Why:** Flywheel: inventory → attendees → organizers.
+- **Data:** Event + Venue city/geo + ticket `price_min` + tags. Filter `status=published AND visibility=public`.
+- **BE:** SQL first; Typesense if needed. **No recommendation AI initially.**
+- **FE:** `/discover` search UI.
+- **API:** `GET /public/discover`.
+- **Deps:** Event, visibility, publish.
+- **Horizon:** Phase 4. **Cx:** M. **Pri:** P1 (after spine).
+
+### 2.4A.2 Browse rails
+- **Does:** Trending, near you, this weekend, popular, new, free, online.
+- **Who:** Consumer in a city (e.g. Delhi this weekend).
+- **Horizon:** Phase 4. **Cx:** M. **Pri:** P1.
+
+### 2.4A.3 Event card
+- **Does:** Projection: public page, organizer, sessions, tickets, related events.
+- **Why:** Card is not a listing entity.
+- **Horizon:** Phase 4. **Cx:** S. **Pri:** P1.
+
+### 2.4A.4 Organizer public profiles
+- **Does:** Host page; list of that org’s PUBLIC events.
+- **Who:** Discovery visitor.
+- **Data:** Organization public fields; later `Follow`.
+- **Horizon:** Phase 4. **Cx:** M. **Pri:** P1.
+
+### 2.4A.5 Consumer IA (Home, Discover, Calendar, My Tickets, Following)
+- **Does:** Network shell for Stage 2 universal app / logged-in web.
+- **Horizon:** Phase 4+ (Following later in the same phase or just after). **Cx:** L. **Pri:** P2 for full IA; Discover search/browse is P1.
+
+### 2.4A.6 Personalization / “what you may like”
+- **Does:** Ranker on the same metadata + later behavior.
+- **Horizon:** **Later.** Do not block Phase 4 on AI. **Cx:** L. **Pri:** P3.
 
 ---
 
@@ -490,11 +540,11 @@ Full design: [09-checkin-badges.md](09-checkin-badges.md).
 
 ### 2.13.1 Tracks & sessions
 - **Does:** Time-bound sessions with room, capacity, speakers.
-- **Horizon:** Phase 5. **Cx:** M. **Pri:** P1.
+- **Horizon:** Phase 6. **Cx:** M. **Pri:** P1.
 
 ### 2.13.2 Personalized agenda
 - **Does:** Attendee saves sessions.
-- **Horizon:** Phase 5–7. **Cx:** M. **Pri:** P2.
+- **Horizon:** Phase 6. **Cx:** M. **Pri:** P2.
 
 ### 2.13.3 Session capacity / waitlist
 - **Horizon:** Later. **Cx:** M. **Pri:** P2.
@@ -506,7 +556,7 @@ Full design: [09-checkin-badges.md](09-checkin-badges.md).
 ### 2.14.1 Speaker profiles
 - **Does:** Name, photo, bio, company, sessions.
 - **Who:** Organizer publishes; speaker may later self-edit.
-- **Horizon:** Phase 5. **Cx:** S. **Pri:** P1.
+- **Horizon:** Phase 6. **Cx:** S. **Pri:** P1.
 
 ### 2.14.2 Speaker portal
 - **Does:** Upload slides, travel, availability.
@@ -520,23 +570,23 @@ Full design: [10-experience-surfaces.md](10-experience-surfaces.md).
 
 ### 2.15.1 Exhibitor account & profile
 - **Does:** Company, booth, description, staff, products.
-- **Horizon:** Phase 6. **Cx:** M. **Pri:** P2.
+- **Horizon:** Phase 7. **Cx:** M. **Pri:** P2.
 
 ### 2.15.2 Booth assignment
 - **Does:** Map booth code to exhibitor.
-- **Horizon:** Phase 6. **Cx:** S. **Pri:** P2.
+- **Horizon:** Phase 7. **Cx:** S. **Pri:** P2.
 
 ### 2.15.3 Pass allocation
 - **Does:** Organizer grants N exhibitor staff tickets; exhibitor assigns people (IMC-style).
-- **Horizon:** Phase 6. **Cx:** M. **Pri:** P2.
+- **Horizon:** Phase 7. **Cx:** M. **Pri:** P2.
 
 ### 2.15.4 Lead capture / QR scan
 - **Does:** Exhibitor scans attendee credential → `Lead`.
-- **Horizon:** Phase 6. **Cx:** M. **Pri:** P2. First expo revenue add-on.
+- **Horizon:** Phase 7. **Cx:** M. **Pri:** P2. First expo revenue add-on.
 
 ### 2.15.5 Meeting requests
 - **Does:** Buyer/exhibitor booking.
-- **Horizon:** Phase 6+. **Cx:** L. **Pri:** P3.
+- **Horizon:** Phase 7+. **Cx:** L. **Pri:** P3.
 
 ---
 
@@ -544,7 +594,7 @@ Full design: [10-experience-surfaces.md](10-experience-surfaces.md).
 
 ### 2.16.1 Sponsor tiers & logos
 - **Does:** Display on site/app; optional landing URL.
-- **Horizon:** Phase 5 (logos on site). **Cx:** S. **Pri:** P1.
+- **Horizon:** Phase 7 (logos on site; can appear earlier on the website template). **Cx:** S. **Pri:** P1.
 
 ### 2.16.2 Sponsor analytics
 - **Does:** Impressions, booth visits, leads.
@@ -598,7 +648,7 @@ Full design: [11-comms-virtual-analytics-security.md](11-comms-virtual-analytics
 
 ### 2.19.3 WhatsApp
 - **3P:** Gupshup / Interakt / WATI. Template-message compliance.
-- **Horizon:** Phase 4. Apply for BSP early. **Cx:** L. **Pri:** P1. India differentiator.
+- **Horizon:** Phase 5. Apply for BSP early. **Cx:** L. **Pri:** P1. India differentiator.
 
 ### 2.19.4 SMS
 - **3P:** MSG91. OTP + transactional.
@@ -606,7 +656,7 @@ Full design: [11-comms-virtual-analytics-security.md](11-comms-virtual-analytics
 
 ### 2.19.5 Push
 - **Deps:** PWA push or native later.
-- **Horizon:** Phase 7. **Cx:** M. **Pri:** P2.
+- **Horizon:** Phase 5. **Cx:** M. **Pri:** P2.
 
 ### 2.19.6 Trigger library
 - Registration confirmed, payment failed, 24h reminder, event start, session start, schedule change, feedback request, waitlist promoted.
@@ -617,9 +667,9 @@ Full design: [11-comms-virtual-analytics-security.md](11-comms-virtual-analytics
 ## 2.20 Event App
 
 ### 2.20.1 Responsive attendee site / PWA
-- **Does:** Ticket, schedule, speakers, venue, notifications.
-- **Horizon:** Ticket page MVP. Full PWA Phase 7. **Cx:** L. **Pri:** P1 then P2.
-- **Decision:** No native app first. See [10-experience-surfaces.md](10-experience-surfaces.md).
+- **Does:** Stage 1 after register: My Pass, Schedule, Speakers, Exhibitors, Networking, Notifications, Venue. Stage 2: universal app (Discover, My Events, Tickets). Stage 3: white-label (much later).
+- **Horizon:** Ticket page MVP. Stage 1 PWA Phase 5. Stage 2 after Phase 4. Stage 3 Phase 9+. **Cx:** L. **Pri:** P1 then P2.
+- **Decision:** No native app first. Same Event Experience (`event_sites`). See [10-experience-surfaces.md](10-experience-surfaces.md), [17-discovery-and-surfaces.md](17-discovery-and-surfaces.md).
 
 ### 2.20.2 Native iOS / Android
 - **Horizon:** **Do not build** until PWA is validated. **Cx:** XL. **Pri:** P3.
@@ -656,15 +706,15 @@ Covered under exhibitors. Also usable by sponsors. Same `Lead` entity.
 
 ### 2.23.1 Polls
 - **Does:** Live session questions, results.
-- **Horizon:** Phase 5/7. **Cx:** M. **Pri:** P2. Could integrate Slido first.
+- **Horizon:** Phase 6. **Cx:** M. **Pri:** P2. Could integrate Slido first.
 
 ### 2.23.2 Q&A
 - **Does:** Moderated questions, upvote.
-- **Horizon:** Phase 5/7. **Cx:** M. **Pri:** P2.
+- **Horizon:** Phase 6. **Cx:** M. **Pri:** P2.
 
 ### 2.23.3 Surveys
 - **Does:** Post-event CSAT / NPS / session feedback.
-- **Horizon:** Phase 4–5. **Cx:** M. **Pri:** P1.
+- **Horizon:** Phase 5. **Cx:** M. **Pri:** P1.
 
 ### 2.23.4 Gamification / games / photo AI
 - **Horizon:** **Do not build.** Dreamcast engagement SKUs. Integrate later if a customer pays.
@@ -750,7 +800,8 @@ SSO, audit logs, data retention, custom domains, SLA, DPA, advanced RBAC, SCIM, 
 | Capability | Decision |
 |------------|----------|
 | User/org/event/registration/ticket/payment/attendee/QR/check-in/email/analytics | **MUST BUILD** |
+| **Discovery search/browse + organizer profiles (Phase 4)** | **SHOULD BUILD** (after spine; first-class, not MVP) |
 | WhatsApp orchestration, sessions, speakers, surveys, PWA, promo codes, waitlist, group reg | **SHOULD BUILD** |
 | Badges+print, exhibitors, networking, access zones, offline scan, approval/invite | **BUILD LATER** |
 | Payments, email/SMS/WhatsApp transport, video, maps, Aadhaar, printers, search hosting | **INTEGRATE** |
-| Facial recognition, kiosks, turnstiles, cashless RFID, 3D venues, native apps, AI match, games, photobooths | **DO NOT BUILD** |
+| Facial recognition, kiosks, turnstiles, cashless RFID, 3D venues, native apps (Stage 3 first), AI match, games, photobooths, recommendation AI in v1 | **DO NOT BUILD** |
