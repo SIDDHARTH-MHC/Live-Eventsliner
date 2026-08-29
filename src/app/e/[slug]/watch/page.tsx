@@ -28,6 +28,21 @@ export default function WatchPage() {
       });
   }, [params.slug, token]);
 
+  useEffect(() => {
+    if (!authorized || !stream) return;
+    const interval = setInterval(() => {
+      fetch("/api/v1/analytics/beacon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: "stream.watch_minute",
+          properties: { slug: params.slug, streamTitle: stream.title },
+        }),
+      }).catch(() => undefined);
+    }, 60_000);
+    return () => clearInterval(interval);
+  }, [authorized, stream, params.slug]);
+
   if (authorized === null) {
     return (
       <PublicShell>

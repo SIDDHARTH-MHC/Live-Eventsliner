@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from "crypto";
 import { db } from "@/lib/db";
 import { extractSystemFields } from "@/lib/registration/form-schema";
-import { getEmailProvider } from "@/lib/email/provider";
+import { sendTriggeredMessage } from "@/lib/comms/engine";
 import { track } from "@/lib/analytics/track";
 import { generatePublicId } from "@/lib/credentials/public-id";
 import { ensureTicketToken, ticketUrl } from "@/lib/credentials/ticket-token";
@@ -18,6 +18,7 @@ export async function materializeAttendee(registrationId: string) {
       ticketType: true,
       event: { include: { org: true } },
       attendee: true,
+      consents: true,
     },
   });
 
@@ -77,16 +78,15 @@ export async function materializeAttendee(registrationId: string) {
 async function sendConfirmationEmail(
   registration: {
     id: string;
+    orgId: string;
+    eventId: string;
     event: { title: string; publicSlug: string | null; startsAt: Date | null; timezone: string };
     ticketType: { name: string };
+    consents?: { kind: string; accepted: boolean }[];
   },
-  attendee: { id: string; firstName: string; lastName: string; email: string },
+  attendee: { id: string; firstName: string; lastName: string; email: string; phone: string | null },
 ) {
   const appUrl = process.env.APP_URL ?? "http://localhost:43123";
-  const eventUrl = registration.event.publicSlug
-    ? `${appUrl}/e/${registration.event.publicSlug}`
-    : appUrl;
-
   const token = await ensureTicketToken(attendee.id);
   const passUrl = ticketUrl(token);
 
@@ -98,20 +98,24 @@ async function sendConfirmationEmail(
       }).format(registration.event.startsAt)
     : "Date TBA";
 
-  const email = getEmailProvider();
-  await email.send({
+  const whatsappConsented = registration.consents?.some(
+    (c) => c.kind === "whatsapp" && c.accepted,
+  );
+
+  await sendTriggeredMessage({
+    trigger: "registration.confirmed",
+    orgId: registration.orgId,
+    eventId: registration.eventId,
     to: attendee.email,
-    subject: `You're registered — ${registration.event.title}`,
-    html: `
-      <p>Hi ${attendee.firstName},</p>
-      <p>You're confirmed for <strong>${registration.event.title}</strong>.</p>
-      <p><strong>Ticket:</strong> ${registration.ticketType.name}</p>
-      <p><strong>When:</strong> ${dateLabel}</p>
-      <p><a href="${passUrl}"><strong>Open your ticket & QR pass</strong></a></p>
-      <p><a href="${eventUrl}">View event page</a></p>
-      <p>Show the QR code at the gate for check-in.</p>
-    `,
-    text: `Hi ${attendee.firstName}, you're registered for ${registration.event.title}. Ticket: ${registration.ticketType.name}. When: ${dateLabel}. Your pass: ${passUrl}`,
+    phone: attendee.phone ?? undefined,
+    whatsappConsented,
+    channels: whatsappConsented ? ["email", "whatsapp"] : ["email"],
+    vars: {
+      firstName: attendee.firstName,
+      eventTitle: registration.event.title,
+      ticketUrl: `${appUrl}${passUrl}`,
+      eventDate: dateLabel,
+    },
   });
 }
 

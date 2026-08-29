@@ -85,6 +85,7 @@ export default function DiscoverPage() {
           {[
             { id: "", label: "All upcoming" },
             { id: "this_weekend", label: "This weekend" },
+            { id: "trending", label: "Trending" },
           ].map((r) => (
             <Button
               key={r.id}
@@ -117,15 +118,13 @@ export default function DiscoverPage() {
             ))}
             {!facets.cities.includes("Delhi") ? <option value="Delhi">Delhi</option> : null}
           </select>
-          <select
-            className="min-h-12 rounded-[var(--radius-sm)] border border-input bg-background px-4 text-body"
-            value={priceFilter}
-            onChange={(e) => setPriceFilter(e.target.value as "" | "free" | "paid")}
+          <Button
+            variant={priceFilter === "free" ? "default" : "outline"}
+            className="min-h-12"
+            onClick={() => setPriceFilter(priceFilter === "free" ? "" : "free")}
           >
-            <option value="">Any price</option>
-            <option value="free">Free</option>
-            <option value="paid">Paid</option>
-          </select>
+            Free only
+          </Button>
         </div>
 
         {category || facets.categories.length > 0 ? (

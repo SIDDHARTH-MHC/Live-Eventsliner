@@ -7,9 +7,11 @@ export type DiscoverFilters = {
   category?: string;
   free?: boolean;
   paid?: boolean;
+  online?: boolean;
   from?: Date;
   to?: Date;
   type?: string;
+  rail?: string;
   limit?: number;
   offset?: number;
 };
@@ -30,6 +32,17 @@ function discoverableWhere(filters: DiscoverFilters): Prisma.EventWhereInput {
 
   if (filters.type) {
     where.type = filters.type as Prisma.EnumEventTypeFilter["equals"];
+  }
+
+  if (filters.online) {
+    where.type = { in: ["webinar", "hybrid"] };
+  }
+
+  if (filters.rail === "trending") {
+    // Events starting within 14 days, ordered by recent registrations
+    const twoWeeks = new Date();
+    twoWeeks.setDate(twoWeeks.getDate() + 14);
+    where.startsAt = { gte: new Date(), lte: twoWeeks };
   }
 
   if (filters.from || filters.to) {
@@ -67,11 +80,20 @@ export async function discoverEvents(filters: DiscoverFilters) {
         orderBy: { priceCents: "asc" },
         take: 1,
       },
+      _count: filters.rail === "trending" ? { select: { registrations: true } } : undefined,
     },
-    orderBy: { startsAt: "asc" },
+    orderBy: filters.rail === "trending" ? undefined : { startsAt: "asc" },
     take: limit + 50,
     skip: offset,
   });
+
+  if (filters.rail === "trending") {
+    events = events.sort((a, b) => {
+      const aCount = "_count" in a ? (a._count as { registrations: number }).registrations : 0;
+      const bCount = "_count" in b ? (b._count as { registrations: number }).registrations : 0;
+      return bCount - aCount;
+    });
+  }
 
   if (filters.free) {
     events = events.filter(
@@ -130,12 +152,16 @@ export async function getOrganizerProfile(orgSlug: string) {
       name: true,
       slug: true,
       primaryColor: true,
+      bio: true,
+      website: true,
+      city: true,
+      isPublicProfile: true,
       country: true,
       timezone: true,
     },
   });
 
-  if (!org) return null;
+  if (!org || !org.isPublicProfile) return null;
 
   const upcomingEvents = await db.event.findMany({
     where: {

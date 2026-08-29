@@ -168,6 +168,10 @@ model User {
   createdEvents    Event[]          @relation("EventCreator")
   eventStaff       EventStaff[]
   checkIns         CheckIn[]        @relation("CheckInStaff")
+  follows          Follow[]
+  savedEvents      SavedEvent[]
+  pushSubscriptions PushSubscription[]
+  totpSecrets      TotpSecret[]
 
   @@index([status])
   @@map("users")
@@ -191,9 +195,14 @@ model Organization {
   customSubdomain   String?  @unique @map("custom_subdomain")
   ssoEnabled        Boolean  @default(false) @map("sso_enabled")
   ssoProvider       String?  @map("sso_provider")
+  bio               String?
+  website           String?
+  city              String?
+  isPublicProfile   Boolean  @default(true) @map("is_public_profile")
   createdAt        DateTime  @default(now()) @map("created_at")
 
   memberships Membership[]
+  followers   Follow[]
   events      Event[]
   media       Media[]
   auditLogs   AuditLog[]
@@ -689,6 +698,24 @@ model Coupon {
 enum MessageChannel {
   email
   sms
+  whatsapp
+  push
+}
+
+enum MessageStatus {
+  queued
+  sent
+  delivered
+  failed
+  bounced
+}
+
+enum MeetingStatus {
+  requested
+  accepted
+  declined
+  done
+  cancelled
 }
 
 model MessageTemplate {
@@ -709,6 +736,81 @@ model MessageTemplate {
   @@unique([eventId, trigger, channel])
   @@index([orgId])
   @@map("message_templates")
+}
+
+model Message {
+  id          String         @id @default(cuid())
+  orgId       String         @map("org_id")
+  eventId     String?        @map("event_id")
+  trigger     String
+  channel     MessageChannel
+  toAddress   String         @map("to_address")
+  subject     String?
+  bodyPreview String?        @map("body_preview")
+  status      MessageStatus  @default(queued)
+  provider    String?
+  providerId  String?        @map("provider_id")
+  error       String?
+  sentAt      DateTime?      @map("sent_at")
+  createdAt   DateTime       @default(now()) @map("created_at")
+
+  @@index([orgId, createdAt])
+  @@index([eventId, createdAt])
+  @@index([toAddress, status])
+  @@map("messages")
+}
+
+model Follow {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  orgId     String   @map("org_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, orgId])
+  @@index([orgId])
+  @@map("follows")
+}
+
+model SavedEvent {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  eventId   String   @map("event_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@index([userId])
+  @@map("saved_events")
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
+}
+
+model TotpSecret {
+  id        String   @id @default(cuid())
+  userId    String   @unique @map("user_id")
+  secret    String
+  enabled   Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("totp_secrets")
 }
 
 model SurveyResponse {
@@ -801,14 +903,34 @@ model NetworkingProfile {
   eventId    String  @map("event_id")
   attendeeId String  @unique @map("attendee_id")
   headline   String?
+  industry   String?
+  role       String?
+  goals      String[] @default([])
   interests  String[] @default([])
   visible    Boolean @default(true)
   connectCode String @unique @map("connect_code")
+  networkingQrPublicId String? @unique @map("networking_qr_public_id")
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@index([eventId, visible])
   @@map("networking_profiles")
+}
+
+model Meeting {
+  id              String        @id @default(cuid())
+  eventId         String        @map("event_id")
+  fromAttendeeId  String        @map("from_attendee_id")
+  toAttendeeId    String        @map("to_attendee_id")
+  startsAt        DateTime?     @map("starts_at")
+  location        String?
+  notes           String?
+  status          MeetingStatus @default(requested)
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  @@index([eventId, status])
+  @@map("meetings")
 }
 
 enum ConnectionStatus {
@@ -867,13 +989,32 @@ model Exhibitor {
   boothNumber  String? @map("booth_number")
   logoUrl      String? @map("logo_url")
   passQuota    Int     @default(5) @map("pass_quota")
+  passesUsed   Int     @default(0) @map("passes_used")
   contactEmail String? @map("contact_email")
+  accessToken  String? @unique @map("access_token")
 
   event Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
   leads Lead[]
+  staff  ExhibitorStaff[]
 
   @@index([eventId])
   @@map("exhibitors")
+}
+
+model ExhibitorStaff {
+  id          String   @id @default(cuid())
+  exhibitorId String   @map("exhibitor_id")
+  attendeeId  String?  @map("attendee_id")
+  name        String
+  email       String
+  phone       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  exhibitor Exhibitor @relation(fields: [exhibitorId], references: [id], onDelete: Cascade)
+
+  @@unique([exhibitorId, email])
+  @@index([exhibitorId])
+  @@map("exhibitor_staff")
 }
 
 model Lead {

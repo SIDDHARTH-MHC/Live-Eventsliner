@@ -3,8 +3,11 @@ import { getSessionUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { customSubdomainRedirect } from "@/lib/domains/custom-subdomain";
 
 export default async function HomePage() {
+  await customSubdomainRedirect();
+
   const user = await getSessionUser();
   if (user) {
     const membership = await db.membership.findFirst({
@@ -15,7 +18,7 @@ export default async function HomePage() {
     if (membership) {
       redirect(`/orgs/${membership.org.slug}`);
     }
-    redirect("/orgs/new");
+    redirect("/app");
   }
 
   return (
@@ -27,12 +30,18 @@ export default async function HomePage() {
         </p>
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Button asChild size="lg">
-            <Link href="/discover">Discover events</Link>
+            <Link href="/app">Explore events</Link>
           </Button>
           <Button asChild variant="outline" size="lg">
             <Link href="/auth/sign-in">Sign in</Link>
           </Button>
         </div>
+        <p className="text-body-sm text-muted-foreground">
+          Organizing an event?{" "}
+          <Link href="/orgs/new" className="text-primary underline">
+            Create an organization
+          </Link>
+        </p>
       </div>
     </div>
   );

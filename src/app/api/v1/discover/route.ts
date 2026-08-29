@@ -11,7 +11,8 @@ export async function GET(request: NextRequest) {
     const type = url.searchParams.get("type") ?? undefined;
     const free = url.searchParams.get("free") === "true";
     const paid = url.searchParams.get("paid") === "true";
-    const rail = url.searchParams.get("rail");
+    const online = url.searchParams.get("online") === "true";
+    const rail = url.searchParams.get("rail") ?? undefined;
     const limit = parseInt(url.searchParams.get("limit") ?? "24", 10);
     const offset = parseInt(url.searchParams.get("offset") ?? "0", 10);
 
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
     if (toParam) to = new Date(toParam);
 
     const [events, facets] = await Promise.all([
-      discoverEvents({ q, city, category, type, free, paid, from, to, limit, offset }),
+      discoverEvents({ q, city, category, type, free, paid, online, from, to, rail, limit, offset }),
       getDiscoverFacets(),
     ]);
 

@@ -144,6 +144,16 @@ export default function EventSettingsPage() {
             </Link>
           </Button>
           <Button asChild variant="outline">
+            <Link href={`/orgs/${params.orgSlug}/events/${params.eventId}/speakers`}>
+              Speakers
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href={`/orgs/${params.orgSlug}/events/${params.eventId}/analytics`}>
+              Analytics
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
             <Link href={`/orgs/${params.orgSlug}/events/${params.eventId}/attendees`}>
               Attendees
             </Link>

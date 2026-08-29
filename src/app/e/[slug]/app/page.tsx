@@ -23,6 +23,17 @@ export default function EventAppPage() {
   }, []);
 
   useEffect(() => {
+    if (token && "serviceWorker" in navigator) {
+      navigator.serviceWorker.ready.then((reg) => {
+        reg.active?.postMessage({
+          type: "CACHE_TICKET",
+          url: `/api/v1/tickets/${token}`,
+        });
+      });
+    }
+  }, [token]);
+
+  useEffect(() => {
     fetch(`/api/v1/public/events/${params.slug}`)
       .then((r) => r.json())
       .then((data) => setEvent(data.event));

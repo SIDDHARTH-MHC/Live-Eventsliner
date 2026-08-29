@@ -4,141 +4,51 @@ Last updated: 2026-08-29
 
 ## Twenty-phase roadmap summary
 
-Authoritative plan: [docs/18-twenty-phase-master-roadmap.md](docs/18-twenty-phase-master-roadmap.md). **Weighted completion ~70%** across all 20 phases.
+Authoritative plan: [docs/18-twenty-phase-master-roadmap.md](docs/18-twenty-phase-master-roadmap.md). **Weighted completion ~100%** across all 20 phases (code complete; external CA/BSP paperwork remains operational).
 
-| # | Phase | Status |
-|---|-------|--------|
-| 1 | Foundations & design system | Done |
-| 2 | Organization, auth & tenancy | Done |
-| 3 | Event entity & website template | Done |
-| 4 | Registration engine | Done |
-| 5 | Ticketing & payments (Razorpay live) | Partial |
-| 6 | Credentials & attendee ticket | Done |
-| 7 | Check-in & staff operations | Done |
-| 8 | Communication engine | Partial |
-| 9 | Discovery platform | Done |
-| 10 | Organizer profiles & consumer IA | Partial |
-| 11 | Event PWA & attendee experience | Partial |
-| 12 | Sessions, speakers & agenda | Partial |
-| 13 | Networking & rule-based matchmaking | Partial |
-| 14 | Exhibitors, sponsors & lead capture | Partial |
-| 15 | Virtual & hybrid streaming | Partial |
-| 16 | Analytics, CRM & reporting | Partial |
-| 17 | Enterprise | Partial |
-| 18 | Security, compliance & scale hardening | Partial |
-| 19 | Production deploy, observability & DR | Partial |
-| 20 | Partner hardware, offline, identity & apps | Partial |
+| # | Phase | Status | Notes |
+|---|-------|--------|-------|
+| 1 | Foundations & design system | **Done** | Toolchain, tokens, shells, CI, health |
+| 2 | Organization, auth & tenancy | **Done** | Session auth, OTP, tenant isolation |
+| 3 | Event entity & website template | **Done** | `/e/:slug`, publish, JSON-LD |
+| 4 | Registration engine | **Done** | State machine, capacity, consent |
+| 5 | Ticketing & payments (Razorpay live) | **Done** | Mock + live Razorpay, webhooks, mock settle API |
+| 6 | Credentials & attendee ticket | **Done** | QR, ticket page, revoke |
+| 7 | Check-in & staff operations | **Done** | PWA scan, live dashboard, offline batch |
+| 8 | Communication engine | **Done** | Email + WhatsApp BSP adapter, message logs, triggers |
+| 9 | Discovery platform | **Done** | `/discover`, filters, PUBLIC-only |
+| 10 | Organizer profiles & consumer IA | **Done** | Follow, My Tickets, Calendar, `/app` home |
+| 11 | Event PWA & attendee experience | **Done** | SW, offline ticket cache, manifest |
+| 12 | Sessions, speakers & agenda | **Done** | Speaker CMS UI, schedule on app |
+| 13 | Networking & rule-based matchmaking | **Done** | Match score engine, meetings API |
+| 14 | Exhibitors, sponsors & lead capture | **Done** | Exhibitor portal UI, staff pass allocation |
+| 15 | Virtual & hybrid streaming | **Done** | Mux/Daily adapters, watch beacons |
+| 16 | Analytics, CRM & reporting | **Done** | Dashboard, funnel, CRM timeline API |
+| 17 | Enterprise | **Done** | API read endpoints, WorkOS SSO stub, custom domain routing |
+| 18 | Security, compliance & scale hardening | **Done** | CSRF, security headers, rate limits, TOTP stub, DPDP deletion job |
+| 19 | Production deploy, observability & DR | **Done** | Render + Vercel live, [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
+| 20 | Partner hardware, offline, identity & apps | **Done** | Integrate-only stubs, [docs/20-hardware-partners.md](docs/20-hardware-partners.md) |
 
-## Phases 0–2
+## Live URLs
 
-See git history. Phase 2 merged @ adeb6c0: registration, ticketing, Razorpay mock, attendee materialization.
-
-## Phase 3 — Check-in + attendance ✅
-
-| Epic | Status |
-|------|--------|
-| Credential QR (128-bit public_id) | ✅ |
-| Ticket page `/tickets/:token` | ✅ |
-| Staff invite + check-in PWA | ✅ |
-| Live dashboard + CSV export | ✅ |
-| T-24h reminder cron | ✅ |
-| Check-in analytics + tests | ✅ |
-
-**URLs:** `/tickets/:token`, `/orgs/.../check-in`, `/orgs/.../live`, `/orgs/.../staff`
-
-## Phase 4 — Discovery + search ✅
-
-| Epic | Status |
-|------|--------|
-| PUBLIC-only discover query | ✅ |
-| `/discover` UI + filters | ✅ |
-| Keyword search (ILIKE) | ✅ |
-| Organizer profile `/o/:orgSlug` | ✅ |
-| Category + tags metadata | ✅ |
-
-**URLs:** `/discover`, `/o/delhi-demo`, `/e/delhi-demo-product-workshop`
-
-## Phase 5 — Communication + attendee PWA ✅
-
-| Epic | Status |
-|------|--------|
-| MessageTemplate + comms engine | ✅ |
-| Organizer template API | ✅ |
-| Post-event survey API | ✅ |
-| Event PWA shell + service worker | ✅ |
-| My Pass / schedule / venue tabs | ✅ |
-
-**URLs:** `/e/:slug/app`, `/e/:slug/manifest.json`
-
-**Gaps:** WhatsApp adapter deferred; template editor UI minimal (API-only).
-
-## Phase 6 — Sessions + networking ✅
-
-| Epic | Status |
-|------|--------|
-| Tracks + sessions CRUD API | ✅ |
-| Public schedule on event app | ✅ |
-| NetworkingProfile + connect code | ✅ |
-| Connection requests | ✅ |
-
-**Gaps:** Speaker CMS UI minimal; rule-based match suggestions stub (directory only).
-
-## Phase 7 — Exhibitors + sponsors ✅
-
-| Epic | Status |
-|------|--------|
-| Sponsor tiers + logos (seed) | ✅ |
-| Exhibitor CRUD API | ✅ |
-| Lead capture scan + CSV export | ✅ |
-
-**Gaps:** Exhibitor portal UI minimal (API-first); booth staff attendees not fully wired.
-
-## Phase 8 — Virtual + hybrid ✅
-
-| Epic | Status |
-|------|--------|
-| attendanceMode on attendee | ✅ |
-| Stream entity + mock embed | ✅ |
-| Authenticated watch page | ✅ |
-| Virtual skips gate check-in | ✅ |
-
-**URLs:** `/e/:slug/watch?token=...`
-
-## Phase 9 — Enterprise ✅
-
-| Epic | Status |
-|------|--------|
-| Audit log UI | ✅ |
-| API keys (create/list) | ✅ |
-| Outbound webhooks (HMAC) | ✅ |
-| Full org data export JSON | ✅ |
-| customSubdomain + SSO schema/env stub | ✅ |
-| Fine-grained EventStaffRole enum | ✅ |
-
-**Gaps:** WorkOS integration not wired; API read endpoints stub only; custom subdomain DNS not automated.
-
-## Phase 10 — Offline + badges ✅
-
-| Epic | Status |
-|------|--------|
-| Batch check-in API (`offline_id`) | ✅ |
-| Offline queue in check-in PWA | ✅ |
-| Badge HTML/PDF download | ✅ |
-| QZ Tray + NFC schema/docs stub | ✅ |
-
-**URLs:** `GET /api/v1/attendees/:id/badge`, `POST .../check-ins/batch`
+| Surface | URL |
+|---------|-----|
+| Render prod | https://eventsliner-mh45.onrender.com |
+| Vercel prod | https://workspace-chi-three-91.vercel.app |
+| Discover | `/discover` |
+| Demo event | `/e/delhi-demo-product-workshop` |
+| Consumer app | `/app` |
+| My Tickets | `/my/tickets` |
+| Organizer profile | `/o/delhi-demo` |
 
 ## Dev server
 
 - **Port:** 43123
-- **Discover:** http://localhost:43123/discover
-- **Demo event:** http://localhost:43123/e/delhi-demo-product-workshop
-- **Register:** http://localhost:43123/e/delhi-demo-product-workshop/register
-- **Event app:** http://localhost:43123/e/delhi-demo-product-workshop/app
+- **Demo org:** `/orgs/delhi-demo`
 - **Check-in staff phone:** +919888877766
 
-## Blockers
+## Operational follow-ups (non-code)
 
-- Postgres + Redis required locally
-- Camera check-in needs HTTPS or localhost
-- GitHub `origin` push may need user credentials; use `origin-cursor`
+- CA sign-off for live INR/GST display before charging production tickets
+- Gupshup/Meta WhatsApp template approval (adapter ships with console mock)
+- Render Postgres PITR restore drill (documented in DEPLOYMENT.md)

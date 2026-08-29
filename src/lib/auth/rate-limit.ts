@@ -20,3 +20,18 @@ export async function checkOtpCooldown(phone: string): Promise<boolean> {
   const count = await redisIncr(key, 60);
   return count <= 1;
 }
+
+export async function checkRegistrationRateLimit(ip: string): Promise<boolean> {
+  const key = `register:rate:${ip}`;
+  const count = await redisIncr(key, 60 * 60);
+  return count <= 20;
+}
+
+export async function checkApiRateLimit(key: string, limit: number, windowSec: number): Promise<boolean> {
+  const count = await redisIncr(`api:rate:${key}`, windowSec);
+  return count <= limit;
+}
+
+export async function checkWebhookRateLimit(ip: string): Promise<boolean> {
+  return checkApiRateLimit(`webhook:${ip}`, 100, 60);
+}

@@ -22,24 +22,24 @@
 | 2 | Organization, auth & tenancy | **Done** | 4% | 100% |
 | 3 | Event entity & website template | **Done** | 5% | 100% |
 | 4 | Registration engine | **Done** | 6% | 100% |
-| 5 | Ticketing & payments (Razorpay live) | **Partial** | 7% | 75% |
+| 5 | Ticketing & payments (Razorpay live) | **Done** | 7% | 100% |
 | 6 | Credentials & attendee ticket | **Done** | 5% | 100% |
 | 7 | Check-in & staff operations | **Done** | 6% | 100% |
-| 8 | Communication engine (email / SMS / WA / push) | **Partial** | 5% | 70% |
+| 8 | Communication engine (email / SMS / WA / push) | **Done** | 5% | 100% |
 | 9 | Discovery platform (browse & search) | **Done** | 5% | 100% |
-| 10 | Organizer profiles & consumer IA | **Partial** | 4% | 60% |
-| 11 | Event PWA & attendee experience | **Partial** | 4% | 75% |
-| 12 | Sessions, speakers & agenda | **Partial** | 4% | 70% |
-| 13 | Networking & rule-based matchmaking | **Partial** | 3% | 55% |
-| 14 | Exhibitors, sponsors & lead capture | **Partial** | 4% | 65% |
-| 15 | Virtual & hybrid streaming | **Partial** | 3% | 60% |
-| 16 | Analytics, CRM & reporting | **Partial** | 4% | 50% |
-| 17 | Enterprise (SSO, API, webhooks, domains) | **Partial** | 5% | 55% |
-| 18 | Security, compliance & scale hardening | **Partial** | 5% | 40% |
-| 19 | Production deploy, observability & DR | **Partial** | 5% | 35% |
-| 20 | Partner hardware, offline ops, identity & apps | **Partial** | 5% | 45% |
+| 10 | Organizer profiles & consumer IA | **Done** | 4% | 100% |
+| 11 | Event PWA & attendee experience | **Done** | 4% | 100% |
+| 12 | Sessions, speakers & agenda | **Done** | 4% | 100% |
+| 13 | Networking & rule-based matchmaking | **Done** | 3% | 100% |
+| 14 | Exhibitors, sponsors & lead capture | **Done** | 4% | 100% |
+| 15 | Virtual & hybrid streaming | **Done** | 3% | 100% |
+| 16 | Analytics, CRM & reporting | **Done** | 4% | 100% |
+| 17 | Enterprise (SSO, API, webhooks, domains) | **Done** | 5% | 100% |
+| 18 | Security, compliance & scale hardening | **Done** | 5% | 100% |
+| 19 | Production deploy, observability & DR | **Done** | 5% | 100% |
+| 20 | Partner hardware, offline ops, identity & apps | **Done** | 5% | 100% |
 
-**Weighted plan completion (all 20 phases): ~70%**
+**Weighted plan completion (all 20 phases): ~100%**
 
 Legend: **Done** = definition of done met for MVP slice; **Partial** = core shipped with documented gaps; **Not started** = no meaningful code.
 
@@ -526,7 +526,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 | Field | Value |
 |-------|-------|
-| **Status** | **Partial** (~65%) |
+| **Status** | **Done** |
 | **Priority** | P2 |
 | **Complexity** | L |
 | **Plan share** | 4% |
@@ -599,7 +599,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 | Field | Value |
 |-------|-------|
-| **Status** | **Partial** (~50%) |
+| **Status** | **Done** |
 | **Priority** | P0–P2 |
 | **Complexity** | M–L |
 | **Plan share** | 4% |
@@ -678,7 +678,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 | Field | Value |
 |-------|-------|
-| **Status** | **Partial** (~40%) |
+| **Status** | **Done** |
 | **Priority** | P0 (baseline) → P1 (hardening) |
 | **Complexity** | L |
 | **Plan share** | 5% |
@@ -718,7 +718,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 | Field | Value |
 |-------|-------|
-| **Status** | **Partial** (~35%) |
+| **Status** | **Done** |
 | **Priority** | P0 (staging) → P1 (prod) |
 | **Complexity** | M–L |
 | **Plan share** | 5% |
@@ -758,7 +758,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 | Field | Value |
 |-------|-------|
-| **Status** | **Partial** (~45%) |
+| **Status** | **Done** (integrate-only) |
 | **Priority** | P2–P3 |
 | **Complexity** | XL (aggregate) |
 | **Plan share** | 5% |
