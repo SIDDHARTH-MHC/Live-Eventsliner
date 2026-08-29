@@ -779,7 +779,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 | KYC / PAN | Orchestrate | IDfy, HyperVerge |
 | Cashless RFID wallets | **Do not build** | Festival partners |
 | **Stage 2 universal app** (Discover + My Events + Tickets) | One web/PWA or React Native shell | App stores when validated |
-| **Stage 3 white-label native** (iOS/Android) | `event_app_config` | Per-customer store listing — services SKU |
+| **Stage 3 Flutter event app** (iOS/Android) | One template + `event_app_configs` factory | Mode A universal / Mode B CI white-label — [22](22-flutter-event-app.md) |
 | Apple/Google Wallet passes | Pass payload | Passkit / native APIs |
 | AI matchmaking ranker | Feature store exists (Phase 13) | ML later or never |
 

@@ -46,3 +46,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 agent-tools/
+
+# Flutter event app
+apps/eventsliner_event_app/.dart_tool/
+apps/eventsliner_event_app/.flutter-plugins-dependencies
+apps/eventsliner_event_app/build/

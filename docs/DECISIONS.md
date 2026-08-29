@@ -21,3 +21,4 @@ Fill this before application code starts. Context: [14-prioritization-risks-deci
 | D15 | Product analytics vendor | **Optional PostHog; customer dashboards first-party** | Engineering | 2026-08-29 |
 | D16 | Default visibility PUBLIC vs UNLISTED | **PUBLIC** (opt out via UNLISTED/PRIVATE); corporate type may default UNLISTED | Engineering | 2026-08-29 |
 | D17 | Discovery geography | **City-first India; Delhi as first example city** | Product | 2026-08-29 |
+| D18 | Event-specific mobile apps | **Flutter template + config factory** — one codebase (`apps/eventsliner_event_app`); Mode A universal store app (runtime `app-config`); Mode B white-label CI flavors (`--dart-define`). **No per-event source forks.** See [22-flutter-event-app.md](22-flutter-event-app.md). | Engineering | 2026-08-29 |

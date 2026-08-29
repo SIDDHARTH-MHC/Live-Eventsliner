@@ -30,9 +30,13 @@ Eventsliner does **not** build in-house hardware, facial recognition, or Aadhaar
 
 - `/app` — Discover + My Tickets + Following + Saved events (PWA-ready)
 
-## Stage 3 white-label native
+## Stage 3 event-specific native (Flutter)
 
-- Customer-funded React Native shell using same APIs — services SKU
+- **Template:** `apps/eventsliner_event_app` (iOS + Android)
+- **No code per event** — organizers configure `event_app_configs`; factory paints brand
+- **Mode A (default):** one Eventsliner Live store app + runtime `GET /api/v1/public/events/:slug/app-config`
+- **Mode B (enterprise):** CI flavor build (`--dart-define`) / Codemagic via `EVENT_APP_BUILD_WEBHOOK_URL`
+- Design: [docs/22-flutter-event-app.md](22-flutter-event-app.md)
 
 ## Apple / Google Wallet
 

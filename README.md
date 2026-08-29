@@ -11,6 +11,7 @@ Canonical Git repository: https://github.com/SIDDHARTH-MHC/Live-Eventsliner.git
 - S3-compatible media · Resend / MSG91 / Gupshup · Razorpay (mock when unset)
 - Design system: [docs/16-design-system.md](docs/16-design-system.md) ([Apple HIG](https://developer.apple.com/design/human-interface-guidelines/) + [Google Design](https://design.google/) / Material 3)
 - Platform standards: [docs/21-platform-standards.md](docs/21-platform-standards.md) ([AWS Well-Architected](https://aws.amazon.com/architecture/well-architected/) + [Google API Design](https://cloud.google.com/apis/design))
+- **Event apps (Flutter, no code per event):** [docs/22-flutter-event-app.md](docs/22-flutter-event-app.md) · [`apps/eventsliner_event_app`](apps/eventsliner_event_app)
 
 ## Live
 

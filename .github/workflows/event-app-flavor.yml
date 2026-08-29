@@ -1,0 +1,60 @@
+# Example Mode B factory — build Flutter event app from dashboard payload.
+# Wire EVENT_APP_BUILD_WEBHOOK_URL to a dispatcher that triggers this workflow
+# (repository_dispatch) or use Codemagic with the same dart-defines.
+name: event-app-flavor
+
+on:
+  repository_dispatch:
+    types: [event_app_build]
+  workflow_dispatch:
+    inputs:
+      event_slug:
+        required: true
+        type: string
+      display_name:
+        required: true
+        type: string
+      primary_color:
+        required: true
+        type: string
+        default: "6750A4"
+      api_base_url:
+        required: true
+        type: string
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/eventsliner_event_app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Resolve defines
+        id: defs
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            echo "slug=${{ github.event.client_payload.eventSlug }}" >> $GITHUB_OUTPUT
+            echo "name=${{ github.event.client_payload.displayName }}" >> $GITHUB_OUTPUT
+            echo "color=${{ github.event.client_payload.primaryColor }}" >> $GITHUB_OUTPUT
+            echo "api=${{ github.event.client_payload.apiBaseUrl }}" >> $GITHUB_OUTPUT
+          else
+            echo "slug=${{ inputs.event_slug }}" >> $GITHUB_OUTPUT
+            echo "name=${{ inputs.display_name }}" >> $GITHUB_OUTPUT
+            echo "color=${{ inputs.primary_color }}" >> $GITHUB_OUTPUT
+            echo "api=${{ inputs.api_base_url }}" >> $GITHUB_OUTPUT
+          fi
+      - run: flutter pub get
+      - run: |
+          flutter build appbundle \
+            --dart-define=API_BASE_URL=${{ steps.defs.outputs.api }} \
+            --dart-define=EVENT_SLUG=${{ steps.defs.outputs.slug }} \
+            --dart-define=APP_DISPLAY_NAME=${{ steps.defs.outputs.name }} \
+            --dart-define=PRIMARY_COLOR=${{ steps.defs.outputs.color }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: event-app-${{ steps.defs.outputs.slug }}-aab
+          path: apps/eventsliner_event_app/build/app/outputs/bundle/release/*.aab

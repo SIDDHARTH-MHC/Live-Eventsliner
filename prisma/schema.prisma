@@ -361,12 +361,55 @@ model Event {
   messageTemplates MessageTemplate[]
   surveyResponses SurveyResponse[]
   networkingProfiles NetworkingProfile[]
+  appConfig          EventAppConfig?
 
   @@unique([orgId, slug])
   @@index([orgId, startsAt])
   @@index([status, startsAt])
   @@index([status, visibility, startsAt])
   @@map("events")
+}
+
+enum EventAppMode {
+  universal
+  white_label
+
+  @@map("event_app_mode")
+}
+
+enum EventAppBuildStatus {
+  draft
+  queued
+  building
+  ready
+  failed
+
+  @@map("event_app_build_status")
+}
+
+/// Stage 3 downloadable event app config — one Flutter template, many events (no per-event code).
+model EventAppConfig {
+  id                String              @id @default(cuid())
+  eventId           String              @unique @map("event_id")
+  enabled           Boolean             @default(false)
+  mode              EventAppMode        @default(universal)
+  displayName       String?             @map("display_name")
+  primaryColor      String?             @map("primary_color")
+  iconMediaId       String?             @map("icon_media_id")
+  splashMediaId     String?             @map("splash_media_id")
+  tabs              Json                @default("[\"home\",\"pass\",\"schedule\",\"more\"]")
+  iosBundleId       String?             @map("ios_bundle_id")
+  androidPackage    String?             @map("android_package")
+  buildStatus       EventAppBuildStatus @default(draft) @map("build_status")
+  lastBuildAt       DateTime?           @map("last_build_at")
+  lastBuildUrl      String?             @map("last_build_url")
+  storeListingNotes String?             @map("store_listing_notes")
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime            @updatedAt @map("updated_at")
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("event_app_configs")
 }
 
 model EventSite {
