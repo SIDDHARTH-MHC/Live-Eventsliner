@@ -48,20 +48,34 @@ export function middleware(request: NextRequest) {
   response.headers.set("X-Request-Id", requestId);
   applySecurityHeaders(response);
 
-  // Custom subdomain hint for server-side routing (Phase 17 stub)
-  const appHost = process.env.APP_URL ? new URL(process.env.APP_URL).host : "";
-  if (appHost && host !== appHost && !host.includes("localhost") && !host.includes("vercel.app")) {
-    const subdomain = host.split(".")[0];
-    if (subdomain && subdomain !== "www") {
+  // Custom subdomain hint — only for branded apex hosts, never IPs / localhost / platforms
+  const hostNoPort = host.split(":")[0] ?? "";
+  const isIpHost = /^\d{1,3}(\.\d{1,3}){3}$/.test(hostNoPort) || hostNoPort === "::1";
+  const isLocalOrPlatform =
+    isIpHost ||
+    hostNoPort === "localhost" ||
+    hostNoPort.endsWith(".localhost") ||
+    hostNoPort.endsWith(".vercel.app") ||
+    hostNoPort.endsWith(".onrender.com");
+  const apex = "eventsliner.live";
+  if (!isLocalOrPlatform && hostNoPort.endsWith(`.${apex}`) && hostNoPort !== apex) {
+    const subdomain = hostNoPort.slice(0, -(apex.length + 1));
+    if (subdomain && subdomain !== "www" && !subdomain.includes(".")) {
       response.headers.set("X-Custom-Subdomain", subdomain);
     }
   }
+
+  // Provider webhooks authenticate via signature — skip CSRF origin check
+  const path = request.nextUrl.pathname;
+  const isProviderWebhook =
+    path === "/api/v1/webhooks/razorpay" || path.startsWith("/api/v1/partners/");
 
   // CSRF: validate origin on mutating API requests with session cookie
   if (
     request.method !== "GET" &&
     request.method !== "HEAD" &&
-    request.nextUrl.pathname.startsWith("/api/")
+    path.startsWith("/api/") &&
+    !isProviderWebhook
   ) {
     const allowedHosts = getAllowedHosts();
     const origin = request.headers.get("origin");

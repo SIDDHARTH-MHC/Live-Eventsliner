@@ -26,6 +26,20 @@ export async function resolveCustomSubdomainRedirect(): Promise<string | null> {
 }
 
 export async function customSubdomainRedirect() {
-  const path = await resolveCustomSubdomainRedirect();
-  if (path) redirect(path);
+  try {
+    const path = await resolveCustomSubdomainRedirect();
+    if (path) redirect(path);
+  } catch (err) {
+    // redirect() throws; rethrow Next.js control-flow errors
+    if (
+      err &&
+      typeof err === "object" &&
+      "digest" in err &&
+      typeof (err as { digest?: unknown }).digest === "string" &&
+      String((err as { digest: string }).digest).startsWith("NEXT_REDIRECT")
+    ) {
+      throw err;
+    }
+    console.error(JSON.stringify({ type: "custom_subdomain_lookup_failed", err: String(err) }));
+  }
 }
