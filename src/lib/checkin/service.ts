@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { track } from "@/lib/analytics/track";
+import { dispatchWebhook } from "@/lib/webhooks/dispatch";
 import { parseQrPayload } from "@/lib/credentials/public-id";
 import type { CheckInResult } from "@prisma/client";
 
@@ -118,6 +119,18 @@ export async function processCheckIn(input: CheckInInput): Promise<CheckInRespon
     return { result: "denied", message: "Registration cancelled" };
   }
 
+  const attendeeRecord = credential.attendee as typeof credential.attendee & {
+    attendanceMode?: string;
+  };
+
+  if (attendeeRecord.attendanceMode === "virtual" && !isManual) {
+    return {
+      result: "denied",
+      message: "Virtual ticket — no gate check-in required",
+      attendee: formatAttendee(credential.attendee),
+    };
+  }
+
   const existingOk = await db.checkIn.findFirst({
     where: {
       credentialId: credential.id,
@@ -182,6 +195,15 @@ export async function processCheckIn(input: CheckInInput): Promise<CheckInRespon
       stationId,
     },
   });
+
+  const event = await db.event.findUnique({ where: { id: eventId }, select: { orgId: true } });
+  if (event) {
+    await dispatchWebhook(event.orgId, "checkin.recorded", {
+      eventId,
+      attendeeId: credential.attendeeId,
+      scannedAt: checkIn.scannedAt.toISOString(),
+    });
+  }
 
   return buildResponse("ok", credential.attendee, checkIn.scannedAt);
 }

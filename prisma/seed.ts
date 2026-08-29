@@ -3,6 +3,7 @@ import { createEvent, publishEvent } from "../src/lib/events/service";
 import { DEFAULT_FORM_SCHEMA } from "../src/lib/registration/form-schema";
 import { materializeAttendee } from "../src/lib/attendees/materialize";
 import { ensureTicketToken, ticketUrl } from "../src/lib/credentials/ticket-token";
+import { ensureDefaultTemplates } from "../src/lib/comms/engine";
 
 const db = new PrismaClient();
 
@@ -195,6 +196,72 @@ async function main() {
       update: { userId: staffUser.id, acceptedAt: new Date() },
     });
     console.log("Seeded check-in staff: +919888877766");
+
+    await ensureDefaultTemplates(org.id, event.id);
+
+    const sessionCount = await db.eventSession.count({ where: { eventId: event.id } });
+    if (sessionCount === 0) {
+      const track = await db.eventTrack.create({
+        data: { eventId: event.id, name: "Main track", sortOrder: 0 },
+      });
+      const starts = event.startsAt ?? new Date();
+      await db.eventSession.createMany({
+        data: [
+          {
+            eventId: event.id,
+            trackId: track.id,
+            title: "Opening keynote",
+            startsAt: starts,
+            endsAt: new Date(starts.getTime() + 60 * 60 * 1000),
+            room: "Auditorium",
+            sortOrder: 0,
+          },
+          {
+            eventId: event.id,
+            trackId: track.id,
+            title: "Hands-on workshop",
+            startsAt: new Date(starts.getTime() + 90 * 60 * 1000),
+            endsAt: new Date(starts.getTime() + 3 * 60 * 60 * 1000),
+            room: "Workshop hall",
+            sortOrder: 1,
+          },
+        ],
+      });
+      console.log("Seeded demo sessions");
+    }
+
+    const streamCount = await db.stream.count({ where: { eventId: event.id } });
+    if (streamCount === 0) {
+      await db.stream.create({
+        data: {
+          eventId: event.id,
+          title: "Live stream",
+          embedUrl: process.env.MOCK_STREAM_URL ?? "https://www.youtube.com/embed/dQw4w9WgXcQ",
+          provider: "youtube",
+        },
+      });
+    }
+
+    const sponsorCount = await db.sponsor.count({ where: { eventId: event.id } });
+    if (sponsorCount === 0) {
+      const tier = await db.sponsorTier.create({
+        data: { eventId: event.id, name: "Gold", sortOrder: 0 },
+      });
+      await db.sponsor.create({
+        data: {
+          eventId: event.id,
+          tierId: tier.id,
+          name: "Delhi Tech Partners",
+          website: "https://example.com",
+          sortOrder: 0,
+        },
+      });
+    }
+
+    await db.event.update({
+      where: { id: event.id },
+      data: { category: "workshop", tags: ["product", "startup", "delhi"] },
+    });
   }
 
   const sampleAttendee = await db.attendee.findFirst({
@@ -207,7 +274,10 @@ async function main() {
 
   console.log(`Demo user: ${email}`);
   console.log(`Demo org: /orgs/${orgSlug}`);
+  console.log(`Discover: /discover`);
+  console.log(`Organizer profile: /o/${orgSlug}`);
   console.log(`Register: /e/${orgSlug}-product-workshop/register`);
+  console.log(`Event app: /e/${orgSlug}-product-workshop/app`);
 }
 
 main()

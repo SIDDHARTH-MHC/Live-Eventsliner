@@ -32,6 +32,35 @@ function getStationId(eventId: string): string {
   return id;
 }
 
+const OFFLINE_QUEUE_KEY = (eventId: string) => `el-offline-queue-${eventId}`;
+
+function getOfflineQueue(eventId: string): { rawPayload: string; offlineId: string; stationId: string }[] {
+  try {
+    return JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY(eventId)) ?? "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveOfflineQueue(eventId: string, queue: unknown[]) {
+  localStorage.setItem(OFFLINE_QUEUE_KEY(eventId), JSON.stringify(queue));
+}
+
+async function syncOfflineQueue(eventId: string) {
+  const queue = getOfflineQueue(eventId);
+  if (queue.length === 0 || !navigator.onLine) return;
+
+  const res = await fetch(`/api/v1/events/${eventId}/check-ins/batch`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" },
+    body: JSON.stringify({ checkIns: queue }),
+  });
+
+  if (res.ok) {
+    saveOfflineQueue(eventId, []);
+  }
+}
+
 export default function CheckInPage() {
   const params = useParams<{ orgSlug: string; eventId: string }>();
   const router = useRouter();
@@ -67,6 +96,13 @@ export default function CheckInPage() {
       });
   }, [authChecked, params.orgSlug, params.eventId]);
 
+  useEffect(() => {
+    if (!authChecked) return;
+    syncOfflineQueue(params.eventId);
+    window.addEventListener("online", () => syncOfflineQueue(params.eventId));
+    return () => window.removeEventListener("online", () => syncOfflineQueue(params.eventId));
+  }, [authChecked, params.eventId]);
+
   const submitCheckIn = useCallback(
     async (payload: {
       rawPayload?: string;
@@ -78,6 +114,19 @@ export default function CheckInPage() {
 
       const stationId = getStationId(params.eventId);
       const idempotencyKey = crypto.randomUUID();
+
+      if (!navigator.onLine && payload.rawPayload) {
+        const queue = getOfflineQueue(params.eventId);
+        queue.push({
+          rawPayload: payload.rawPayload,
+          offlineId: crypto.randomUUID(),
+          stationId,
+        });
+        saveOfflineQueue(params.eventId, queue);
+        setLastResult({ result: "ok", message: "Queued offline — will sync when online" });
+        processingRef.current = false;
+        return;
+      }
 
       try {
         const res = await fetch(`/api/v1/events/${params.eventId}/check-ins`, {

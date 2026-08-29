@@ -188,12 +188,17 @@ model Organization {
   status           OrgStatus @default(active)
   razorpayKeyId    String?   @map("razorpay_key_id")
   razorpayKeySecret String?  @map("razorpay_key_secret")
+  customSubdomain   String?  @unique @map("custom_subdomain")
+  ssoEnabled        Boolean  @default(false) @map("sso_enabled")
+  ssoProvider       String?  @map("sso_provider")
   createdAt        DateTime  @default(now()) @map("created_at")
 
   memberships Membership[]
   events      Event[]
   media       Media[]
   auditLogs   AuditLog[]
+  apiKeys     ApiKey[]
+  webhooks    WebhookEndpoint[]
 
   @@map("organizations")
 }
@@ -337,6 +342,16 @@ model Event {
   orders         Order[]
   eventStaff     EventStaff[]
   checkIns       CheckIn[]
+  tracks         EventTrack[]
+  eventSessions  EventSession[]
+  speakers       Speaker[]
+  sponsors       Sponsor[]
+  sponsorTiers   SponsorTier[]
+  exhibitors     Exhibitor[]
+  streams        Stream[]
+  messageTemplates MessageTemplate[]
+  surveyResponses SurveyResponse[]
+  networkingProfiles NetworkingProfile[]
 
   @@unique([orgId, slug])
   @@index([orgId, startsAt])
@@ -539,6 +554,8 @@ model Attendee {
   company        String?
   jobTitle       String?        @map("job_title")
   category       String?
+  attendanceMode AttendanceMode @default(in_person) @map("attendance_mode")
+  nfcUid         String?        @map("nfc_uid")
   status         AttendeeStatus @default(registered)
   answers        Json           @default("{}")
   createdAt      DateTime       @default(now()) @map("created_at")
@@ -667,4 +684,264 @@ model Coupon {
 
   @@unique([eventId, code])
   @@map("coupons")
+}
+
+enum MessageChannel {
+  email
+  sms
+}
+
+model MessageTemplate {
+  id        String         @id @default(cuid())
+  eventId   String?        @map("event_id")
+  orgId     String         @map("org_id")
+  trigger   String
+  channel   MessageChannel @default(email)
+  subject   String?
+  bodyHtml  String         @map("body_html")
+  bodyText  String?        @map("body_text")
+  active    Boolean        @default(true)
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+
+  event Event? @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, trigger, channel])
+  @@index([orgId])
+  @@map("message_templates")
+}
+
+model SurveyResponse {
+  id         String   @id @default(cuid())
+  eventId    String   @map("event_id")
+  attendeeId String?  @map("attendee_id")
+  answers    Json     @default("{}")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@map("survey_responses")
+}
+
+model EventTrack {
+  id        String @id @default(cuid())
+  eventId   String @map("event_id")
+  name      String
+  sortOrder Int    @default(0) @map("sort_order")
+
+  event    Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  sessions EventSession[]
+
+  @@index([eventId])
+  @@map("tracks")
+}
+
+model EventSession {
+  id          String    @id @default(cuid())
+  eventId     String    @map("event_id")
+  trackId     String?   @map("track_id")
+  title       String
+  description String?
+  startsAt    DateTime? @map("starts_at")
+  endsAt      DateTime? @map("ends_at")
+  room        String?
+  sortOrder   Int       @default(0) @map("sort_order")
+
+  event    Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  track    EventTrack?      @relation(fields: [trackId], references: [id], onDelete: SetNull)
+  speakers SessionSpeaker[]
+  saves    SessionSave[]
+
+  @@index([eventId, startsAt])
+  @@map("event_sessions")
+}
+
+model Speaker {
+  id        String  @id @default(cuid())
+  eventId   String  @map("event_id")
+  name      String
+  title     String?
+  company   String?
+  bio       String?
+  photoUrl  String? @map("photo_url")
+  sortOrder Int     @default(0) @map("sort_order")
+
+  event    Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  sessions SessionSpeaker[]
+
+  @@index([eventId])
+  @@map("speakers")
+}
+
+model SessionSpeaker {
+  sessionId String @map("session_id")
+  speakerId String @map("speaker_id")
+
+  session EventSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  speaker Speaker      @relation(fields: [speakerId], references: [id], onDelete: Cascade)
+
+  @@id([sessionId, speakerId])
+  @@map("session_speakers")
+}
+
+model SessionSave {
+  id         String @id @default(cuid())
+  sessionId  String @map("session_id")
+  attendeeId String @map("attendee_id")
+
+  session EventSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, attendeeId])
+  @@map("session_saves")
+}
+
+model NetworkingProfile {
+  id         String  @id @default(cuid())
+  eventId    String  @map("event_id")
+  attendeeId String  @unique @map("attendee_id")
+  headline   String?
+  interests  String[] @default([])
+  visible    Boolean @default(true)
+  connectCode String @unique @map("connect_code")
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, visible])
+  @@map("networking_profiles")
+}
+
+enum ConnectionStatus {
+  pending
+  accepted
+  declined
+}
+
+model ConnectionRequest {
+  id          String           @id @default(cuid())
+  eventId     String           @map("event_id")
+  fromAttendeeId String        @map("from_attendee_id")
+  toAttendeeId   String        @map("to_attendee_id")
+  status      ConnectionStatus @default(pending)
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  @@unique([eventId, fromAttendeeId, toAttendeeId])
+  @@map("connection_requests")
+}
+
+model SponsorTier {
+  id        String @id @default(cuid())
+  eventId   String @map("event_id")
+  name      String
+  sortOrder Int    @default(0) @map("sort_order")
+
+  event    Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  sponsors Sponsor[]
+
+  @@index([eventId])
+  @@map("sponsor_tiers")
+}
+
+model Sponsor {
+  id        String  @id @default(cuid())
+  eventId   String  @map("event_id")
+  tierId    String? @map("tier_id")
+  name      String
+  logoUrl   String? @map("logo_url")
+  website   String?
+  sortOrder Int     @default(0) @map("sort_order")
+
+  event Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tier  SponsorTier? @relation(fields: [tierId], references: [id], onDelete: SetNull)
+
+  @@index([eventId])
+  @@map("sponsors")
+}
+
+model Exhibitor {
+  id           String @id @default(cuid())
+  eventId      String @map("event_id")
+  orgId        String @map("org_id")
+  name         String
+  description  String?
+  boothNumber  String? @map("booth_number")
+  logoUrl      String? @map("logo_url")
+  passQuota    Int     @default(5) @map("pass_quota")
+  contactEmail String? @map("contact_email")
+
+  event Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  leads Lead[]
+
+  @@index([eventId])
+  @@map("exhibitors")
+}
+
+model Lead {
+  id          String   @id @default(cuid())
+  exhibitorId String   @map("exhibitor_id")
+  attendeeId  String   @map("attendee_id")
+  eventId     String   @map("event_id")
+  notes       String?
+  scannedAt   DateTime @default(now()) @map("scanned_at")
+
+  exhibitor Exhibitor @relation(fields: [exhibitorId], references: [id], onDelete: Cascade)
+
+  @@unique([exhibitorId, attendeeId])
+  @@index([exhibitorId])
+  @@map("leads")
+}
+
+model Stream {
+  id          String  @id @default(cuid())
+  eventId     String  @map("event_id")
+  title       String
+  embedUrl    String  @map("embed_url")
+  provider    String  @default("mux")
+  isLive      Boolean @default(false) @map("is_live")
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@map("streams")
+}
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  orgId      String    @map("org_id")
+  name       String
+  keyHash    String    @unique @map("key_hash")
+  keyPrefix  String    @map("key_prefix")
+  scopes     String[]  @default([])
+  lastUsedAt DateTime? @map("last_used_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  revokedAt  DateTime? @map("revoked_at")
+
+  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@map("api_keys")
+}
+
+model WebhookEndpoint {
+  id        String   @id @default(cuid())
+  orgId     String   @map("org_id")
+  url       String
+  secret    String
+  events    String[] @default([])
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@map("webhook_endpoints")
+}
+
+model BadgeTemplate {
+  id        String @id @default(cuid())
+  eventId   String @unique @map("event_id")
+  layout    Json   @default("{}")
+  zplTemplate String? @map("zpl_template")
+
+  @@map("badge_templates")
 }
