@@ -118,6 +118,7 @@ Hosting should be India-region first (`ap-south-1` or equivalent) because this p
 | 28 | Major technical risks | [14](docs/14-prioritization-risks-decisions.md) |
 | 29 | Decisions before coding | [14](docs/14-prioritization-risks-decisions.md), [DECISIONS.md](docs/DECISIONS.md) |
 | 30 | Recommended first sprint | [15](docs/15-start-here.md) |
+| 31 | Design system (always on) | [16](docs/16-design-system.md), [.cursor/rules/design-system.mdc](.cursor/rules/design-system.mdc) |
 
 ## Status
 
