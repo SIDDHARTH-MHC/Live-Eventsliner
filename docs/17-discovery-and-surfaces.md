@@ -51,7 +51,7 @@ Do not build website + app + discovery as independent systems, independent event
 | Event website (`/e/:slug`) | Phase 1 | `event_sites` (theme, sections) |
 | Mobile web / PWA | Phase 5 (stage 1) | same Event + experience config |
 | Universal Eventsliner app | Stage 2 (after discovery exists) | same Event; shell is the network |
-| White-label native app | Stage 3, much later | `event_app_config` / `event_experience` (evolve from `event_sites`) |
+| White-label native app (Flutter) | Stage 3, customer-funded | Flutter `apps/eventsliner_event_app` + `event_app_configs` — [22](22-flutter-event-app.md) |
 
 **Naming rule**
 
@@ -189,7 +189,7 @@ Users should **not** download 15 event apps. Dreamcast-style white-label is a **
 |-------|------|------|
 | **1. Event PWA after register** | Add to home screen. My Pass, Schedule, Speakers, Exhibitors, Networking, Notifications, Venue | Phase 5 attendee experience (after spine; schedule/speakers need Phase 6 data — show what exists, hide empty) |
 | **2. Universal Eventsliner app** | Discover, My Events, Tickets, then **tap into** the event experience | After Phase 4 discovery exists; one app, many events |
-| **3. White-label enterprise app** | Dreamcast-like branded store listing for large customers | Phase 9+, much later. Do not start native iOS/Android for this in v1 |
+| **3. White-label enterprise app** | Dreamcast-like branded store listing (Flutter iOS/Android template) | Phase 20 Stage 3 / customer-funded — [22-flutter-event-app.md](22-flutter-event-app.md) |
 
 Stage 1 is still **the same Event**, not a fork. Native iOS + Android + website builder + discovery + full Dreamcast suite **at once** is the explosion failure mode ([14](14-prioritization-risks-decisions.md)).
 

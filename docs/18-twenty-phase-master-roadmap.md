@@ -778,7 +778,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 | **Aadhaar / UIDAI OVSE** | **Do not build** | IDfy / HyperVerge / certified OVSE only |
 | KYC / PAN | Orchestrate | IDfy, HyperVerge |
 | Cashless RFID wallets | **Do not build** | Festival partners |
-| **Stage 2 universal app** (Discover + My Events + Tickets) | One web/PWA or React Native shell | App stores when validated |
+| **Stage 2 universal app** (Discover + My Events + Tickets) | One web/PWA shell (`/app`) | App stores when validated |
 | **Stage 3 Flutter event app** (iOS/Android) | One template + `event_app_configs` factory | Mode A universal / Mode B CI white-label — [22](22-flutter-event-app.md) |
 | Apple/Google Wallet passes | Pass payload | Passkit / native APIs |
 | AI matchmaking ranker | Feature store exists (Phase 13) | ML later or never |
@@ -794,7 +794,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 4. E20.4 NFC/turnstile partner adapter spec (integrate-only)
 5. E20.5 Identity verification partner hook (Aadhaar/FR — opt-in enterprise only)
 6. E20.6 Stage 2 universal Eventsliner app
-7. E20.7 Stage 3 white-label native (customer-funded)
+7. E20.7 Stage 3 Flutter event app (`apps/eventsliner_event_app`, customer-funded white-label)
 8. E20.8 AI matchmaking (optional, data-dependent)
 
 **Definition of done:** Offline queue syncs without double-admit; badge prints via partner stack; FR/Aadhaar documented as integrate-only with legal gate; Stage 2 app lists Discover + My Tickets; no in-house hardware shipped.

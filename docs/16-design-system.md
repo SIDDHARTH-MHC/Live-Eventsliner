@@ -8,7 +8,7 @@
 
 This document is the durable source of tokens, surface rules, and Material vs Apple conflict resolutions. The Cursor rule is the operational MUST / MUST NOT bar. If they drift, **fix the rule to match this doc**.
 
-Eventsliner.live is an India-first event platform (see [00](00-executive-thesis.md), [10](10-experience-surfaces.md), [15](15-start-here.md)). Stack when built: Next.js, TypeScript, Tailwind, shadcn/ui. Surfaces: public event pages, organizer dashboard, attendee ticket/QR, check-in staff UI (phone-first), later PWA. **Do not start native iOS/Android.** Still apply Human Interface Guidelines that apply to touch web.
+Eventsliner.live is an India-first event platform (see [00](00-executive-thesis.md), [10](10-experience-surfaces.md), [15](15-start-here.md)). Stack when built: Next.js, TypeScript, Tailwind, shadcn/ui. Surfaces: public event pages, organizer dashboard, attendee ticket/QR, check-in staff UI (phone-first), later PWA. **Native event-specific store apps are Flutter** (`apps/eventsliner_event_app`) — still follow Material 3 + Apple HIG; web/PWA remains the default path (Stage 1–2). See [22-flutter-event-app.md](22-flutter-event-app.md).
 
 **Building product UI without this system is forbidden.**
 

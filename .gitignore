@@ -47,7 +47,13 @@ yarn-error.log*
 next-env.d.ts
 agent-tools/
 
-# Flutter event app
-apps/eventsliner_event_app/.dart_tool/
+# Flutter (apps/*)
+**/build/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+apps/**/ios/Flutter/ephemeral/
+apps/**/ios/Flutter/Generated.xcconfig
+apps/**/ios/Flutter/flutter_export_environment.sh
 apps/eventsliner_event_app/.flutter-plugins-dependencies
 apps/eventsliner_event_app/build/
