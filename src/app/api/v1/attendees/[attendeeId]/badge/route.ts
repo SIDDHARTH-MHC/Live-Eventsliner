@@ -2,13 +2,15 @@ import { NextRequest } from "next/server";
 import { withApiContext, errorJson } from "@/lib/api/response";
 import { db } from "@/lib/db";
 import { buildQrPayload } from "@/lib/credentials/public-id";
+import { getBadgePrintPartner } from "@/lib/partners/hardware";
 import QRCode from "qrcode";
 
 type RouteParams = { params: Promise<{ attendeeId: string }> };
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
-  return withApiContext(request, async () => {
+  return withApiContext(request, async (req) => {
     const { attendeeId } = await params;
+    const format = new URL(req.url).searchParams.get("format") ?? "html";
 
     const attendee = await db.attendee.findUnique({
       where: { id: attendeeId },
@@ -17,6 +19,21 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (!attendee?.credential || attendee.credential.status !== "active") {
       return errorJson(404, "NOT_FOUND", "Attendee or credential not found");
+    }
+
+    if (format === "zpl") {
+      const partner = getBadgePrintPartner();
+      const payload = await partner.buildPayload({
+        attendeeId: attendee.id,
+        publicId: attendee.credential.publicId,
+        displayName: `${attendee.firstName} ${attendee.lastName}`,
+        ticketType: attendee.ticketType.name,
+        eventTitle: attendee.event.title,
+        format: "zpl",
+      });
+      return new Response(payload.zpl ?? "", {
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      });
     }
 
     const qrPayload = buildQrPayload(attendee.credential.publicId);
@@ -39,7 +56,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   <img src="${qrDataUrl}" alt="QR code" />
   <p class="type">${attendee.ticketType.name}</p>
 </div>
-<p style="margin-top:24px;font-size:12px;color:#666">Print this page for your badge. QZ Tray integration: see docs/badge-printing.md</p>
+<p style="margin-top:24px;font-size:12px;color:#666">Print via QZ Tray + Zebra. ZPL: ?format=zpl — see docs/20-hardware-partners.md</p>
 </body></html>`;
 
     return new Response(html, {

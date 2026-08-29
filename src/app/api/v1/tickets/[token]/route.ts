@@ -40,6 +40,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return json({
       attendee: {
+        id: attendee.id,
         firstName: attendee.firstName,
         lastName: attendee.lastName,
         ticketType: attendee.ticketType.name,

@@ -173,6 +173,11 @@ export default function EventSettingsPage() {
               Staff
             </Link>
           </Button>
+          <Button asChild variant="outline">
+            <Link href={`/orgs/${params.orgSlug}/events/${params.eventId}/templates`}>
+              Templates
+            </Link>
+          </Button>
           {event.status === "published" ? (
             <Button variant="secondary" onClick={unpublish}>
               Unpublish

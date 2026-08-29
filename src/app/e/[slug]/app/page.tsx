@@ -5,21 +5,44 @@ import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { PublicShell } from "@/components/shells/public-shell";
 
-type Tab = "pass" | "schedule" | "venue";
+type Tab = "pass" | "schedule" | "venue" | "network";
 
 export default function EventAppPage() {
   const params = useParams<{ slug: string }>();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const [tab, setTab] = useState<Tab>("pass");
-  const [event, setEvent] = useState<{ title: string; venueName: string | null; city: string | null } | null>(null);
-  const [ticket, setTicket] = useState<{ qrSvg: string; attendee: { firstName: string; lastName: string } } | null>(null);
-  const [sessions, setSessions] = useState<{ id: string; title: string; startsAt: string | null; room: string | null }[]>([]);
+  const [event, setEvent] = useState<{
+    title: string;
+    venueName: string | null;
+    city: string | null;
+  } | null>(null);
+  const [ticket, setTicket] = useState<{
+    qrSvg: string;
+    attendee: { firstName: string; lastName: string; id?: string };
+  } | null>(null);
+  const [sessions, setSessions] = useState<
+    { id: string; title: string; startsAt: string | null; room: string | null }[]
+  >([]);
+  const [suggestions, setSuggestions] = useState<
+    { profileId: string; headline: string | null; score: number; reasons: string[] }[]
+  >([]);
+  const [offline, setOffline] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw-event.js").catch(() => undefined);
     }
+    const onOffline = () => setOffline(true);
+    const onOnline = () => setOffline(false);
+    setOffline(!navigator.onLine);
+    window.addEventListener("offline", onOffline);
+    window.addEventListener("online", onOnline);
+    return () => {
+      window.removeEventListener("offline", onOffline);
+      window.removeEventListener("online", onOnline);
+    };
   }, []);
 
   useEffect(() => {
@@ -35,8 +58,12 @@ export default function EventAppPage() {
 
   useEffect(() => {
     fetch(`/api/v1/public/events/${params.slug}`)
-      .then((r) => r.json())
-      .then((data) => setEvent(data.event));
+      .then(async (r) => {
+        if (!r.ok) throw new Error("event");
+        return r.json();
+      })
+      .then((data) => setEvent(data.event))
+      .catch(() => setError("Unable to load event"));
     fetch(`/api/v1/public/events/${params.slug}/sessions`)
       .then((r) => r.json())
       .then((data) => setSessions(data.sessions ?? []));
@@ -51,22 +78,46 @@ export default function EventAppPage() {
       });
   }, [token]);
 
+  useEffect(() => {
+    if (!ticket?.attendee?.id) return;
+    fetch(
+      `/api/v1/public/events/${params.slug}/networking/suggestions?attendeeId=${ticket.attendee.id}`,
+    )
+      .then((r) => r.json())
+      .then((data) => setSuggestions(data.suggestions ?? []));
+  }, [params.slug, ticket?.attendee?.id]);
+
+  const hasVenue = !!(event?.venueName || event?.city);
   const tabs: { id: Tab; label: string }[] = [
     { id: "pass", label: "My Pass" },
-    { id: "schedule", label: "Schedule" },
-    { id: "venue", label: "Venue" },
+    ...(sessions.length > 0 ? [{ id: "schedule" as const, label: "Schedule" }] : []),
+    ...(hasVenue ? [{ id: "venue" as const, label: "Venue" }] : []),
+    ...(suggestions.length > 0 || ticket ? [{ id: "network" as const, label: "Network" }] : []),
   ];
 
   return (
     <PublicShell>
       <div className="mx-auto max-w-md px-4 py-6">
         <h1 className="text-headline">{event?.title ?? "Event"}</h1>
-        <nav className="mt-6 flex gap-2 border-b border-outline pb-2">
+        {offline ? (
+          <p className="mt-2 rounded-[var(--radius-sm)] bg-surface-container px-3 py-2 text-body-sm" role="status">
+            Offline — showing cached ticket when available
+          </p>
+        ) : null}
+        {error ? (
+          <p className="mt-2 text-body text-error" role="alert">
+            {error}
+          </p>
+        ) : null}
+
+        <nav className="mt-6 flex gap-2 border-b border-outline pb-2" aria-label="Event app">
           {tabs.map((t) => (
             <button
               key={t.id}
               type="button"
-              className={`min-h-12 flex-1 rounded-[var(--radius-sm)] text-body-lg font-medium ${tab === t.id ? "bg-primary text-primary-foreground" : ""}`}
+              className={`min-h-12 flex-1 rounded-[var(--radius-sm)] text-body-lg font-medium ${
+                tab === t.id ? "bg-primary text-primary-foreground" : ""
+              }`}
               onClick={() => setTab(t.id)}
             >
               {t.label}
@@ -96,6 +147,16 @@ export default function EventAppPage() {
                   {ticket.attendee.firstName} {ticket.attendee.lastName}
                 </p>
               ) : null}
+              {token ? (
+                <p className="mt-6 text-center">
+                  <Link
+                    href={`/e/${params.slug}/watch?token=${encodeURIComponent(token)}`}
+                    className="text-primary underline"
+                  >
+                    Watch virtual stream
+                  </Link>
+                </p>
+              ) : null}
             </div>
           )}
           {tab === "schedule" && (
@@ -108,7 +169,9 @@ export default function EventAppPage() {
                     <p className="text-body-lg font-medium">{s.title}</p>
                     {s.startsAt ? (
                       <p className="text-body-sm text-muted-foreground">
-                        {new Date(s.startsAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}
+                        {new Date(s.startsAt).toLocaleString("en-IN", {
+                          timeZone: "Asia/Kolkata",
+                        })}
                         {s.room ? ` · ${s.room}` : ""}
                       </p>
                     ) : null}
@@ -121,12 +184,32 @@ export default function EventAppPage() {
             <div className="text-body-lg">
               {event?.venueName ? <p className="font-medium">{event.venueName}</p> : null}
               {event?.city ? <p className="text-muted-foreground">{event.city}</p> : null}
-              {!event?.venueName && !event?.city ? (
-                <p className="text-muted-foreground">Venue details on the event page</p>
-              ) : null}
               <Link href={`/e/${params.slug}`} className="mt-4 inline-block text-primary underline">
                 Full event page
               </Link>
+            </div>
+          )}
+          {tab === "network" && (
+            <div>
+              <p className="text-body text-muted-foreground">
+                Rule-based suggestions from shared interests, goals, and sessions.
+              </p>
+              {suggestions.length === 0 ? (
+                <p className="mt-4 text-body">No suggestions yet — complete your networking profile.</p>
+              ) : (
+                <ul className="mt-4 space-y-3">
+                  {suggestions.map((s) => (
+                    <li
+                      key={s.profileId}
+                      className="rounded-[var(--radius-sm)] border border-outline p-4"
+                    >
+                      <p className="text-body-lg font-medium">{s.headline ?? "Attendee"}</p>
+                      <p className="text-label text-muted-foreground">Score {s.score}</p>
+                      <p className="mt-1 text-body-sm">{s.reasons.slice(0, 2).join(" · ")}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
         </div>

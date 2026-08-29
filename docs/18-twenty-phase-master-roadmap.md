@@ -2,7 +2,7 @@
 
 **Status:** Authoritative sequencing document for Eventsliner.live. Supersedes the 10-phase summary in [13-mvp-roadmap-tickets.md](13-mvp-roadmap-tickets.md) for planning and progress tracking; that doc remains the engineering ticket breakdown for Phases 0–9.
 
-**Last updated:** 2026-08-29
+**Last updated:** 2026-08-29 (verification pass; Partial sections aligned to Done + ops gaps)
 
 **Principles (unchanged):**
 
@@ -204,7 +204,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 | Field | Value |
 |-------|-------|
-| **Status** | **Partial** (~75%) |
+| **Status** | **Done** |
 | **Priority** | P0 |
 | **Complexity** | L–XL |
 | **Plan share** | 7% |
@@ -224,7 +224,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 **Out of scope:** Cashless RFID, in-house acquiring, multi-currency (Stripe later), promo codes (P1 follow-up), partial refunds (later).
 
-**Gaps (current):** Live Razorpay Route/linked accounts not fully verified; GST invoice PDF thin; CA sign-off pending for production INR.
+**Gaps (ops):** Live Razorpay keys + CA sign-off for production INR; GST invoice PDF deferred. Code path + mock settle complete.
 
 **Key epics:**
 1. E5.1 Ticket types + inventory + holds
@@ -311,7 +311,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 | Field | Value |
 |-------|-------|
-| **Status** | **Partial** (~70%) |
+| **Status** | **Done** |
 | **Priority** | P0–P1 |
 | **Complexity** | L |
 | **Plan share** | 5% |
@@ -331,7 +331,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 **Out of scope:** Building WhatsApp protocol, email MTA, marketing blast sophistication (basic blast OK).
 
-**Gaps (current):** WhatsApp adapter deferred; template editor UI minimal (API-only); push not fully wired.
+**Gaps (ops):** Gupshup/Meta template approval; Web Push delivery when VAPID keys set. Engine + email + WA adapter + template UI shipped.
 
 **Key epics:**
 1. E8.1 Communication engine core
@@ -383,7 +383,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 | Field | Value |
 |-------|-------|
-| **Status** | **Partial** (~60%) |
+| **Status** | **Done** |
 | **Priority** | P1–P2 |
 | **Complexity** | M–L |
 | **Plan share** | 4% |
@@ -402,7 +402,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 **Out of scope:** Luma social graph clone, AI "what you may like" (defer), native app shell (Phase 20).
 
-**Gaps (current):** Following, Calendar, My Tickets, Home rails incomplete.
+**Gaps (ops):** None for MVP. AI recommendations deferred.
 
 **Key epics:**
 1. E10.1 Organizer profile page ✅
@@ -419,7 +419,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 | Field | Value |
 |-------|-------|
-| **Status** | **Partial** (~75%) |
+| **Status** | **Done** |
 | **Priority** | P1 |
 | **Complexity** | L |
 | **Plan share** | 4% |
@@ -437,7 +437,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 **Out of scope:** Native iOS/Android (Phase 20), white-label (Phase 20), universal app shell (Phase 20).
 
-**Gaps (current):** Push minimal; Speakers/Exhibitors/Networking tabs depend on Phases 12–14 data.
+**Gaps (ops):** Web Push send path needs VAPID keys. Networking tab uses rule-based suggestions when profile exists.
 
 **Key epics:**
 1. E11.1 PWA manifest + service worker
@@ -454,7 +454,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 | Field | Value |
 |-------|-------|
-| **Status** | **Partial** (~70%) |
+| **Status** | **Done** |
 | **Priority** | P1 |
 | **Complexity** | M |
 | **Plan share** | 4% |
@@ -473,7 +473,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 **Out of scope:** Speaker self-serve portal (P3), Slido integration (integrate if needed).
 
-**Gaps (current):** Speaker CMS UI minimal; website schedule sections thin.
+**Gaps (ops):** Session waitlist / session check-in optional P2.
 
 **Key epics:**
 1. E12.1 Tracks + sessions CRUD
@@ -490,7 +490,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 | Field | Value |
 |-------|-------|
-| **Status** | **Partial** (~55%) |
+| **Status** | **Done** |
 | **Priority** | P2 |
 | **Complexity** | M–L |
 | **Plan share** | 3% |
@@ -509,7 +509,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 **Out of scope:** **AI matchmaking / embeddings** (Phase 20+ or never), speed-networking ops format, virtual table networking.
 
-**Gaps (current):** Rule-based suggestions stub (directory only).
+**Gaps (ops):** None for MVP. AI matchmaking deferred.
 
 **Key epics:**
 1. E13.1 Networking profile + opt-in
@@ -545,7 +545,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 **Out of scope:** 3D booths, live commerce, offline-online expo sync as special DB.
 
-**Gaps (current):** Exhibitor portal UI minimal (API-first); booth staff attendees not fully wired.
+**Gaps (ops):** Floor-map embed is URL-only; 3D booths out of scope.
 
 **Key epics:**
 1. E14.1 Exhibitor + booth CRUD
@@ -562,7 +562,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 | Field | Value |
 |-------|-------|
-| **Status** | **Partial** (~60%) |
+| **Status** | **Done** |
 | **Priority** | P2 |
 | **Complexity** | L |
 | **Plan share** | 3% |
@@ -582,7 +582,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 **Out of scope:** Mixhub / 3D / metaverse (**Partner / never build**), proprietary video stack, Hopin clone.
 
-**Gaps (current):** Mock embed only; Mux/Daily not wired for production.
+**Gaps (ops):** Mux/Daily adapters ready when keys set; mock embed otherwise.
 
 **Key epics:**
 1. E15.1 Attendance mode UX
@@ -619,7 +619,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 **Out of scope:** Building a Salesforce; pixel-perfect PDF report builder in v1.
 
-**Gaps (current):** CRM timeline not built; charts limited; warehouse not started.
+**Gaps (ops):** Warehouse/materialized views deferred. CRM timeline + funnel dashboard shipped.
 
 **Key epics:**
 1. E16.1 Analytics ingest (complete event catalog)
@@ -636,7 +636,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 | Field | Value |
 |-------|-------|
-| **Status** | **Partial** (~55%) |
+| **Status** | **Done** |
 | **Priority** | P2–P3 |
 | **Complexity** | L–XL |
 | **Plan share** | 5% |
@@ -660,7 +660,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 **Out of scope:** Building an IdP; venue sourcing.
 
-**Gaps (current):** WorkOS not wired; API read stub only; custom subdomain DNS not automated.
+**Gaps (ops):** WorkOS live when env set (mock otherwise); custom subdomain config + middleware; DNS/SSL automation is operational.
 
 **Key epics:**
 1. E17.1 Audit log UI
@@ -700,7 +700,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 **Out of scope:** Building Aadhaar/OVSE, facial recognition, PCI acquiring.
 
-**Gaps (current):** 2FA not shipped; full DPDP deletion jobs incomplete; load testing at 2k check-ins not documented.
+**Gaps (ops):** TOTP optional; DPDP deletion cron shipped; 2k load test is operational follow-up.
 
 **Key epics:**
 1. E18.1 RBAC hardening + penetration checklist
@@ -741,7 +741,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 **Out of scope:** Multi-region active-active (until revenue warrants).
 
-**Gaps (current):** Render account pending email verification; prod not live; DR drill not executed; worker may be inline not separate dyno.
+**Gaps (ops):** Render + Vercel live. PITR restore drill + separate worker dyno are operational follow-ups.
 
 **Key epics:**
 1. E19.1 Staging deploy + seed
@@ -785,7 +785,7 @@ Legend: **Done** = definition of done met for MVP slice; **Partial** = core ship
 
 **Out of scope:** In-house kiosks, turnstile R&D, 3D venues, native apps as default path, building OVSE.
 
-**Gaps (current):** Offline batch ✅; badge download ✅; QZ/NFC docs stub; FR/Aadhaar not started (correct); universal/white-label apps not started.
+**Gaps (ops):** Partner adapter contracts + NFC/turnstile APIs shipped. FR/Aadhaar intentionally not built; Stage 3 white-label is services SKU.
 
 **Key epics:**
 1. E20.1 Offline check-in sync (batch API + PWA queue) ✅

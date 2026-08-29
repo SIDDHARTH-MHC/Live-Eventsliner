@@ -27,6 +27,13 @@ export default function AttendeesPage() {
   const [status, setStatus] = useState<"loading" | "idle">("loading");
   const [message, setMessage] = useState("");
   const [live, setLive] = useState<{ registered: number; checkedIn: number } | null>(null);
+  const [timelineAttendeeId, setTimelineAttendeeId] = useState<string | null>(null);
+  const [timeline, setTimeline] = useState<{
+    attendee: { name: string; email: string; status: string };
+    checkIns: { id: string; result: string; scannedAt: string; isManual: boolean }[];
+    messages: { id: string; trigger: string; channel: string; status: string; createdAt: string }[];
+  } | null>(null);
+  const [timelineLoading, setTimelineLoading] = useState(false);
 
   function load() {
     const qs = new URLSearchParams();
@@ -77,6 +84,18 @@ export default function AttendeesPage() {
     if (res.ok) {
       setMessage("Confirmation email sent");
     }
+  }
+
+  async function openCrm(attendeeId: string) {
+    setTimelineAttendeeId(attendeeId);
+    setTimelineLoading(true);
+    setTimeline(null);
+    const res = await fetch(
+      `/api/v1/orgs/${params.orgSlug}/events/${params.eventId}/analytics?attendeeId=${attendeeId}`,
+    );
+    const data = await res.json();
+    setTimeline(data.timeline ?? null);
+    setTimelineLoading(false);
   }
 
   if (status === "loading") {
@@ -184,6 +203,14 @@ export default function AttendeesPage() {
                           variant="outline"
                           size="sm"
                           className="min-h-10"
+                          onClick={() => openCrm(a.id)}
+                        >
+                          CRM
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="min-h-10"
                           onClick={() => resendConfirmation(a.registration.id)}
                         >
                           Resend
@@ -207,6 +234,66 @@ export default function AttendeesPage() {
           </CardContent>
         </Card>
       )}
+
+      {timelineAttendeeId ? (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>CRM timeline</CardTitle>
+            <Button variant="ghost" size="sm" onClick={() => setTimelineAttendeeId(null)}>
+              Close
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {timelineLoading ? (
+              <p className="text-body text-muted-foreground">Loading timeline…</p>
+            ) : !timeline ? (
+              <p className="text-body text-muted-foreground">No timeline data.</p>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-body">
+                  <strong>{timeline.attendee.name}</strong> · {timeline.attendee.email} ·{" "}
+                  <span className="capitalize">{timeline.attendee.status.replace("_", " ")}</span>
+                </p>
+                <div>
+                  <h3 className="text-title-sm font-semibold">Check-ins</h3>
+                  {timeline.checkIns.length === 0 ? (
+                    <p className="mt-1 text-body-sm text-muted-foreground">None yet</p>
+                  ) : (
+                    <ul className="mt-2 space-y-1 text-body-sm">
+                      {timeline.checkIns.map((c) => (
+                        <li key={c.id}>
+                          {c.result} ·{" "}
+                          {new Date(c.scannedAt).toLocaleString("en-IN", {
+                            timeZone: "Asia/Kolkata",
+                          })}
+                          {c.isManual ? " (manual)" : ""}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-title-sm font-semibold">Messages</h3>
+                  {timeline.messages.length === 0 ? (
+                    <p className="mt-1 text-body-sm text-muted-foreground">No messages logged</p>
+                  ) : (
+                    <ul className="mt-2 space-y-1 text-body-sm">
+                      {timeline.messages.map((m) => (
+                        <li key={m.id}>
+                          {m.trigger} · {m.channel} · {m.status} ·{" "}
+                          {new Date(m.createdAt).toLocaleString("en-IN", {
+                            timeZone: "Asia/Kolkata",
+                          })}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      ) : null}
     </div>
   );
 }
