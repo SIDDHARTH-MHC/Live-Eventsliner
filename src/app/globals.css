@@ -1,0 +1,260 @@
+@import "tailwindcss";
+
+/* Eventsliner design tokens — Material 3 roles + Apple HIG bar (docs/16-design-system.md) */
+
+:root {
+  /* Primary (Eventsliner brand — organizer primary overrides via data attribute) */
+  --primary: #6750a4;
+  --on-primary: #ffffff;
+  --primary-container: #eaddff;
+  --on-primary-container: #21005d;
+
+  /* Secondary */
+  --secondary: #625b71;
+  --on-secondary: #ffffff;
+  --secondary-container: #e8def8;
+  --on-secondary-container: #1d192b;
+
+  /* Error / success / warning */
+  --error: #b3261e;
+  --on-error: #ffffff;
+  --error-container: #f9dedc;
+  --on-error-container: #410e0b;
+  --success: #146c2e;
+  --on-success: #ffffff;
+  --warning: #7d5700;
+  --on-warning: #ffffff;
+
+  /* Surfaces */
+  --surface: #fffbfe;
+  --surface-container: #f3edf7;
+  --surface-container-high: #ece6f0;
+  --on-surface: #1c1b1f;
+  --on-surface-variant: #49454f;
+  --outline: #79747e;
+  --outline-variant: #cac4d0;
+  --inverse-surface: #313033;
+  --on-inverse-surface: #f4eff4;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Motion */
+  --motion-exit: 200ms;
+  --motion-fast: 150ms;
+  --motion-enter: 300ms;
+  --motion-on-screen: 300ms;
+
+  /* shadcn mappings */
+  --background: var(--surface);
+  --foreground: var(--on-surface);
+  --card: var(--surface-container);
+  --card-foreground: var(--on-surface);
+  --popover: var(--surface-container-high);
+  --popover-foreground: var(--on-surface);
+  --muted: var(--surface-container);
+  --muted-foreground: var(--on-surface-variant);
+  --accent: var(--secondary-container);
+  --accent-foreground: var(--on-secondary-container);
+  --destructive: var(--error);
+  --destructive-foreground: var(--on-error);
+  --border: var(--outline-variant);
+  --input: var(--outline-variant);
+  --ring: var(--primary);
+  --radius: var(--radius-md);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: #d0bcff;
+    --on-primary: #381e72;
+    --primary-container: #4f378b;
+    --on-primary-container: #eaddff;
+    --secondary: #ccc2dc;
+    --on-secondary: #332d41;
+    --secondary-container: #4a4458;
+    --on-secondary-container: #e8def8;
+    --error: #f2b8b5;
+    --on-error: #601410;
+    --error-container: #8c1d18;
+    --on-error-container: #f9dedc;
+    --success: #6dd58c;
+    --on-success: #003913;
+    --warning: #f9c74f;
+    --on-warning: #3d2e00;
+    --surface: #1c1b1f;
+    --surface-container: #211f26;
+    --surface-container-high: #2b2930;
+    --on-surface: #e6e1e5;
+    --on-surface-variant: #cac4d0;
+    --outline: #938f99;
+    --outline-variant: #49454f;
+    --inverse-surface: #e6e1e5;
+    --on-inverse-surface: #313033;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-exit: 0ms;
+    --motion-fast: 0ms;
+    --motion-enter: 0ms;
+    --motion-on-screen: 0ms;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--on-primary);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--on-secondary);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-error: var(--error);
+  --color-surface: var(--surface);
+  --color-surface-container: var(--surface-container);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-outline: var(--outline);
+  --font-sans: var(--font-inter);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-lg);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-size: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-inter), system-ui, sans-serif;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  .text-display-lg {
+    font-size: 3.5rem;
+    line-height: 1.12;
+    font-weight: 500;
+  }
+
+  .text-display-sm {
+    font-size: 2.25rem;
+    line-height: 1.2;
+    font-weight: 500;
+  }
+
+  .text-headline {
+    font-size: 1.5rem;
+    line-height: 1.25;
+    font-weight: 600;
+  }
+
+  .text-title-lg {
+    font-size: 1.25rem;
+    line-height: 1.3;
+    font-weight: 600;
+  }
+
+  .text-title-md {
+    font-size: 1rem;
+    line-height: 1.4;
+    font-weight: 600;
+  }
+
+  .text-title-sm {
+    font-size: 0.875rem;
+    line-height: 1.4;
+    font-weight: 600;
+  }
+
+  .text-body-lg {
+    font-size: 1.0625rem;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+
+  .text-body {
+    font-size: 1rem;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+
+  .text-body-sm {
+    font-size: 0.875rem;
+    line-height: 1.45;
+    font-weight: 400;
+  }
+
+  .text-label {
+    font-size: 0.875rem;
+    line-height: 1.25;
+    font-weight: 500;
+  }
+
+  .text-label-sm {
+    font-size: 0.75rem;
+    line-height: 1.3;
+    font-weight: 500;
+  }
+
+  .text-caption {
+    font-size: 0.75rem;
+    line-height: 1.3;
+    font-weight: 400;
+  }
+
+  .min-hit-target {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  .safe-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .safe-top {
+    padding-top: max(0px, env(safe-area-inset-top));
+  }
+}
+
+[data-organizer-primary] {
+  --primary: var(--organizer-primary, var(--primary));
+  --on-primary: var(--organizer-on-primary, var(--on-primary));
+  --primary-container: var(--organizer-primary-container, var(--primary-container));
+  --on-primary-container: var(
+    --organizer-on-primary-container,
+    var(--on-primary-container)
+  );
+}
