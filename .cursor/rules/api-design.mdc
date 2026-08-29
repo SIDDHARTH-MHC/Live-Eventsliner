@@ -1,0 +1,35 @@
+---
+description: Google API Design Guide (AIP) rules for Eventsliner HTTP APIs — errors, pagination, resource naming.
+alwaysApply: true
+---
+
+# API design (Google AIP) — always on
+
+Canonical hub: [Google API Design Guide](https://cloud.google.com/apis/design). Eventsliner map: [docs/21-platform-standards.md](docs/21-platform-standards.md).
+
+Building or changing `/api/**` without this is **forbidden**.
+
+## MUST
+
+- Versioned under `/api/v1/`.
+- Resource-oriented URLs (`/orgs/{org}/events/{event}/…`), not RPC-ish verbs in paths.
+- Errors via `errorJson()` / `withApiContext()` from `@/lib/api/response` (AIP-193 JSON: `code` HTTP, `status` rpc Code, `reason` ErrorInfo, `details[]`).
+- List methods: support `pageSize` + `pageToken`, return `nextPageToken` (`@/lib/api/pagination`). Legacy `limit`/`offset` only as aliases.
+- JSON fields `lowerCamelCase`.
+- Create → `201` with the resource. Delete → `200`/`204` consistently.
+- Check **permission before existence** for private resources (403 vs 404).
+- Idempotent webhooks; verify signatures before side effects.
+- Include `X-Request-Id` (handled by `json` / `withApiContext`).
+
+## MUST NOT
+
+- Invent a second error shape (`{ error: "string" }` or ad-hoc codes).
+- Return stack traces or internal SQL to clients.
+- Put secrets or PII in error `metadata` beyond what the caller already knows.
+- Break existing clients that read `error.message` / form `fields` without a migration path.
+
+## References
+
+- Errors: https://cloud.google.com/apis/design/errors  
+- Design patterns (pagination): https://cloud.google.com/apis/design/design_patterns  
+- Resource-oriented design: https://cloud.google.com/apis/design/resources  

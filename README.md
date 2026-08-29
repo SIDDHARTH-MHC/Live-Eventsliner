@@ -9,7 +9,8 @@ Canonical Git repository: https://github.com/SIDDHARTH-MHC/Live-Eventsliner.git
 - Next.js 16 (App Router) + TypeScript + Tailwind CSS 4 + shadcn-style UI
 - PostgreSQL + Prisma · Redis (OTP, rate limits; in-memory fallback)
 - S3-compatible media · Resend / MSG91 / Gupshup · Razorpay (mock when unset)
-- Design system: [docs/16-design-system.md](docs/16-design-system.md)
+- Design system: [docs/16-design-system.md](docs/16-design-system.md) ([Apple HIG](https://developer.apple.com/design/human-interface-guidelines/) + [Google Design](https://design.google/) / Material 3)
+- Platform standards: [docs/21-platform-standards.md](docs/21-platform-standards.md) ([AWS Well-Architected](https://aws.amazon.com/architecture/well-architected/) + [Google API Design](https://cloud.google.com/apis/design))
 
 ## Live
 

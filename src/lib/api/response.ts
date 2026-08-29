@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createRequestId, log, runWithRequestContext } from "@/lib/observability/logger";
+import { buildApiError } from "@/lib/api/errors";
 
 export function json(data: unknown, init?: ResponseInit) {
   const headers = new Headers(init?.headers);
@@ -12,13 +13,19 @@ function getRequestId(): string {
   return createRequestId();
 }
 
+/**
+ * AIP-193 HTTP/JSON error body.
+ * Clients should read `error.status` (rpc Code), `error.reason` (ErrorInfo),
+ * and `error.message`. Form UIs may use `error.fields` or BadRequest details.
+ */
 export function errorJson(
   status: number,
   code: string,
   message: string,
   details?: Record<string, unknown>,
 ) {
-  return json({ error: { code, message, details } }, { status });
+  const body = buildApiError(status, code, message, details);
+  return json(body, { status });
 }
 
 export function validateOrigin(request: Request): boolean {

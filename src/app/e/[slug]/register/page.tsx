@@ -91,9 +91,10 @@ export default function RegisterPage() {
     const data = await res.json();
     if (!res.ok) {
       setStatus("idle");
-      if (data.error?.details?.fields) {
-        setErrors(data.error.details.fields);
-      }
+      const fields =
+        data.error?.fields ??
+        (data.error?.details?.fields as Record<string, string> | undefined);
+      if (fields) setErrors(fields);
       setMessage(data.error?.message ?? "Registration failed");
       return;
     }

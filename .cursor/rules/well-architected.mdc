@@ -1,0 +1,32 @@
+---
+description: AWS Well-Architected pillars applied to Eventsliner (ops, security, reliability, performance, cost, sustainability).
+alwaysApply: true
+---
+
+# Well-Architected — always on
+
+Canonical hub: [AWS Well-Architected](https://aws.amazon.com/architecture/well-architected/). Eventsliner map: [docs/21-platform-standards.md](docs/21-platform-standards.md).
+
+Applies **regardless of host** (Render, Vercel, AWS). Do not require AWS services to follow these pillars.
+
+## MUST (by pillar)
+
+| Pillar | Bar for Eventsliner |
+|--------|---------------------|
+| **Operational excellence** | Structured request logs; `GET /health`; documented deploy; reversible migrations |
+| **Security** | AuthZ via `can()` / API key scopes; CSRF on session mutations; HMAC webhooks; security headers; secrets only in env |
+| **Reliability** | Managed Postgres; payment webhook reconciliation; graceful Redis/email fallbacks |
+| **Performance** | Prefer India-proximate regions; paginate lists; avoid N+1 in new queries |
+| **Cost** | Modular monolith; no new microservices/queues unless a phase doc requires them |
+| **Sustainability** | Efficient pagination; no chatty polling without backoff |
+
+## MUST NOT
+
+- Ship features that skip health/logging/authz “for speed.”
+- Store production PII only on ephemeral disk.
+- Hard-code secrets or commit `.env`.
+- Add Kubernetes/Kafka/service mesh for v1 taste.
+
+## When designing a change
+
+Ask: How do we observe it? How do we secure it? How does it fail? What does it cost? Document answers in the PR/commit body for non-trivial work.

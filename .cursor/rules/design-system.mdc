@@ -5,6 +5,12 @@ alwaysApply: true
 
 # Eventsliner design system (always on)
 
+**External hubs (binding):**
+
+- [Google Design](https://design.google/) → operational system is **Material 3** ([m3.material.io](https://m3.material.io/))
+- [Apple Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/) → interaction, a11y, touch, writing
+- Cross-cutting platform standards (APIs + Well-Architected): [docs/21-platform-standards.md](docs/21-platform-standards.md)
+
 This product is **web / PWA first** (Next.js, TypeScript, Tailwind, shadcn/ui). Native iOS/Android apps are later. **Still treat Apple HIG as the interaction and accessibility bar** for every touch surface.
 
 **Authoritative detail:** [docs/16-design-system.md](docs/16-design-system.md). If this rule and a mock, a shadcn default, or a vibe-coded layout disagree, **this rule and that doc win**.

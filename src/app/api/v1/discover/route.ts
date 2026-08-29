@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { withApiContext, json } from "@/lib/api/response";
 import { discoverEvents, getDiscoverFacets, thisWeekendRange } from "@/lib/discovery/service";
+import { encodePageToken, parsePageParams } from "@/lib/api/pagination";
 
 export async function GET(request: NextRequest) {
   return withApiContext(request, async (req) => {
@@ -13,8 +14,13 @@ export async function GET(request: NextRequest) {
     const paid = url.searchParams.get("paid") === "true";
     const online = url.searchParams.get("online") === "true";
     const rail = url.searchParams.get("rail") ?? undefined;
-    const limit = parseInt(url.searchParams.get("limit") ?? "24", 10);
-    const offset = parseInt(url.searchParams.get("offset") ?? "0", 10);
+
+    // AIP-158: pageSize + pageToken (legacy limit/offset still accepted)
+    const page = parsePageParams(url.searchParams, { defaultPageSize: 24 });
+    const legacyLimit = url.searchParams.get("limit");
+    const legacyOffset = url.searchParams.get("offset");
+    const limit = legacyLimit ? parseInt(legacyLimit, 10) : page.pageSize;
+    const offset = legacyOffset ? parseInt(legacyOffset, 10) : page.offset;
 
     let from: Date | undefined;
     let to: Date | undefined;
@@ -31,10 +37,34 @@ export async function GET(request: NextRequest) {
     if (toParam) to = new Date(toParam);
 
     const [events, facets] = await Promise.all([
-      discoverEvents({ q, city, category, type, free, paid, online, from, to, rail, limit, offset }),
+      discoverEvents({
+        q,
+        city,
+        category,
+        type,
+        free,
+        paid,
+        online,
+        from,
+        to,
+        rail,
+        limit: limit + 1,
+        offset,
+      }),
       getDiscoverFacets(),
     ]);
 
-    return json({ events, facets, total: events.length });
+    const hasMore = events.length > limit;
+    const pageEvents = hasMore ? events.slice(0, limit) : events;
+    const nextPageToken = hasMore ? encodePageToken(offset + pageEvents.length) : null;
+
+    return json({
+      events: pageEvents,
+      facets,
+      totalSize: pageEvents.length,
+      nextPageToken,
+      // legacy aliases
+      total: pageEvents.length,
+    });
   });
 }

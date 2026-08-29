@@ -4,6 +4,8 @@
 
 **Cursor rule (agents):** [.cursor/rules/design-system.mdc](../.cursor/rules/design-system.mdc) (`alwaysApply: true`).
 
+**Platform companions:** APIs + Well-Architected → [21-platform-standards.md](21-platform-standards.md). UI hubs → [Google Design](https://design.google/), [Apple HIG](https://developer.apple.com/design/human-interface-guidelines/).
+
 This document is the durable source of tokens, surface rules, and Material vs Apple conflict resolutions. The Cursor rule is the operational MUST / MUST NOT bar. If they drift, **fix the rule to match this doc**.
 
 Eventsliner.live is an India-first event platform (see [00](00-executive-thesis.md), [10](10-experience-surfaces.md), [15](15-start-here.md)). Stack when built: Next.js, TypeScript, Tailwind, shadcn/ui. Surfaces: public event pages, organizer dashboard, attendee ticket/QR, check-in staff UI (phone-first), later PWA. **Do not start native iOS/Android.** Still apply Human Interface Guidelines that apply to touch web.
