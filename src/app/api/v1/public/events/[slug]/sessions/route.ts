@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { withApiContext, errorJson, json } from "@/lib/api/response";
 import { db } from "@/lib/db";
+import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 type RouteParams = { params: Promise<{ slug: string }> };
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       data: {
         eventId: event.id,
         attendeeId: body.attendeeId,
-        answers: body.answers,
+        answers: body.answers as Prisma.InputJsonValue,
       },
     });
 

@@ -60,14 +60,16 @@ async function main() {
       venueName: "India Habitat Centre",
       city: "Delhi",
       visibility: "public",
-      category: "workshop",
-      tags: ["product", "startup", "delhi"],
       createdById: user.id,
     });
 
     await db.event.update({
       where: { id: event.id },
-      data: { registrationFormSchema: DEFAULT_FORM_SCHEMA },
+      data: {
+        registrationFormSchema: DEFAULT_FORM_SCHEMA,
+        category: "workshop",
+        tags: ["product", "startup", "delhi"],
+      },
     });
 
     await db.ticketType.createMany({

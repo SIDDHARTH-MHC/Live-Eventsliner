@@ -2,7 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
 
 type PublicShellProps = {
-  eventTitle: string;
+  eventTitle?: string;
   organizerName?: string;
   primaryColor?: string;
   children: ReactNode;
@@ -10,7 +10,7 @@ type PublicShellProps = {
 };
 
 export function PublicShell({
-  eventTitle,
+  eventTitle = "",
   organizerName,
   primaryColor,
   children,
