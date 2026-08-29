@@ -12,14 +12,25 @@ function hasRazorpayConfigured() {
 }
 
 function demoTicketTypes(eventId: string, orgId: string) {
-  const tickets = [
+  type TicketSeed = {
+    eventId: string;
+    orgId: string;
+    name: string;
+    description: string;
+    priceCents: number;
+    mode: "open_free" | "open_paid" | "rsvp";
+    quantity: number | null;
+    sortOrder: number;
+  };
+
+  const tickets: TicketSeed[] = [
     {
       eventId,
       orgId,
       name: "Free seat",
       description: "General admission — no payment required",
       priceCents: 0,
-      mode: "open_free" as const,
+      mode: "open_free",
       quantity: 50,
       sortOrder: 0,
     },
@@ -29,7 +40,7 @@ function demoTicketTypes(eventId: string, orgId: string) {
       name: "RSVP",
       description: "Let us know if you are coming",
       priceCents: 0,
-      mode: "rsvp" as const,
+      mode: "rsvp",
       quantity: null,
       sortOrder: 2,
     },
@@ -42,7 +53,7 @@ function demoTicketTypes(eventId: string, orgId: string) {
       name: "VIP workshop pass",
       description: "Includes front-row seating and materials (mock paid — use dev checkout)",
       priceCents: 49900,
-      mode: "open_paid" as const,
+      mode: "open_paid",
       quantity: 20,
       sortOrder: 1,
     });
