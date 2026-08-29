@@ -117,3 +117,11 @@ Discovery (`/discover`), tickets, Razorpay, QR, check-in, WhatsApp, native apps 
 
 Infrastructure is also defined in [`render.yaml`](render.yaml) for Blueprint redeploys.
 
+### Vercel (alternative)
+
+Import [SIDDHARTH-MHC/Live-Eventsliner](https://github.com/SIDDHARTH-MHC/Live-Eventsliner) in the Vercel dashboard; [`vercel.json`](vercel.json) sets Next.js, `pnpm install`, migrate-on-build, and region `bom1` (Mumbai).
+
+**Required env vars:** `DATABASE_URL` (Neon), `REDIS_URL` (Upstash), `SESSION_SECRET`, `APP_URL`. Full runbook: [docs/VERCEL_DEPLOY.md](docs/VERCEL_DEPLOY.md).
+
+Use `VERCEL_TOKEN` from [Account → Tokens](https://vercel.com/account/tokens) for CLI deploys — not `vck_` keys (those are for AI Gateway only).
+
