@@ -1,0 +1,165 @@
+---
+description: Permanent Eventsliner design system — Material 3 structure + Apple HIG interaction/a11y bar. Never ship UI without this.
+alwaysApply: true
+---
+
+# Eventsliner design system (always on)
+
+This product is **web / PWA first** (Next.js, TypeScript, Tailwind, shadcn/ui). Native iOS/Android apps are later. **Still treat Apple HIG as the interaction and accessibility bar** for every touch surface.
+
+**Authoritative detail:** [docs/16-design-system.md](docs/16-design-system.md). If this rule and a mock, a shadcn default, or a vibe-coded layout disagree, **this rule and that doc win**.
+
+Building UI without following this is **forbidden**. Do not invent a third design language. Do not treat shadcn defaults as the design system.
+
+## How the two systems combine (do not pick one)
+
+| Layer | Follow | Why |
+|-------|--------|-----|
+| Structure, tokens, color roles, type roles, density, states, elevation-as-tone | **Material Design 3** (m3.material.io) | Tokenized, maps to CSS/Tailwind; organizer `primary_color` theming |
+| Interaction, a11y, writing, modality, feedback, forms, motion restraint | **Apple HIG** | iPhone Safari + staff check-in must feel native-quality |
+| Taste bar for public pages | Luma-quality **clarity**, not decoration | D13; Apple: content over chrome (deference) |
+| Primitives | **shadcn/ui** | Kit only. Restyle tokens and usage to this system |
+
+**MUST NOT** ship a Material-looking Android clone on iPhone, or an iOS-looking clone on Android Chrome. One Eventsliner system. **MUST NOT** copy M3 Expressive bounce/overshoot onto check-in, payments, or errors.
+
+## Never ship UI without
+
+Every screen, dialog, empty state, and email-adjacent web view **MUST**:
+
+1. Meet the accessibility bar below.
+2. Use design tokens (type, space, color roles, radius, elevation, motion) — not one-off hex, px, or easing.
+3. Include **enabled, hover (pointer), focus-visible, pressed, disabled** (and error where inputs exist). Material: states need **two** visual indicators (not color alone). Apple: always a **press** state.
+4. Have loading, empty, error, and success treatments **designed**, not left as blank or `undefined`.
+5. Work at **390px** width first (public + check-in). Dashboard usable at 390px; dense only from `md` up.
+6. Feel native-quality on **iPhone Safari** and **mid-range Android Chrome** (safe areas, 44/48 targets, `100dvh`, no hover-only actions).
+
+**MUST NOT** ship a “looks fine in the desktop screenshot” layout.
+
+## Accessibility (non-negotiable)
+
+Apple HIG: interface is **intuitive, perceivable, adaptable**. Material: translate visual UI into a **text-based linear** experience (semantic HTML + names). WCAG 2.2 AA is the floor.
+
+**MUST**
+
+- Contrast: **4.5:1** body/UI text; **3:1** large/bold (≥18px or bold ≥14px) and non-text UI (icons, borders that convey state). Prefer **7:1** for small text and **check-in in sunlight**.
+- **Do not convey meaning by color alone** (pair with icon, text, or shape). Apple: red-green and blue-orange pairs fail for many people.
+- Visible **`:focus-visible`** ring (2px+, 3:1 against adjacent). Never `outline: none` without a replacement.
+- Every control has an accessible **name** (`label`, `aria-label`, or visible text). Inputs: visible `<label>` (placeholder is not a label — Apple HIG text fields).
+- Hit target **≥ 48×48 CSS px** (Material 48dp). Apple’s 44×44 pt is the other number — **use 48**. Check-in primary actions **≥ 56px**, success/fail zones larger.
+- Spacing between adjacent controls: enough that a thumb does not hit the neighbor (Apple: ~12pt padded / ~24pt unbezeled).
+- Keyboard: all actions reachable; logical tab order; `Esc` closes overlays; focus trapped in modal sheets/dialogs and restored on close.
+- `prefers-reduced-motion: reduce` → no zoom/scale/parallax/bounce; **fade or instant**. Never use motion as the only status signal.
+- Text resizes with root/`rem`. Do not disable pinch-zoom. Body **≥ 16px** (Apple iOS body default 17pt; Material body 16sp). Check-in body **≥ 18px**.
+- Images: alt text (empty alt only if decorative). Live regions for check-in result and form errors (`aria-live`).
+- `autocomplete`, correct `type`/`inputmode` (tel, email, numeric). India phone fields are `tel`.
+
+**MUST NOT**
+
+- Auto-dismiss errors/toasts on a short timer as the only way to read them (Apple: avoid time-boxed UI).
+- Autoplay video/audio.
+- Custom gesture-only actions without a visible control (Apple: offer an alternative to swipe).
+- `user-scalable=no` or max-scale 1.
+
+## Typography, spacing, color, elevation
+
+**MUST**
+
+- Type roles, not random sizes: `display` / `headline` / `title` / `body` / `label` (Material 3). Map to Tailwind/shadcn in tokens. Public heroes may use display; dashboards stay title/body/label.
+- One product sans (plus optional display for public heroes). **Do not mix many typefaces.** Apple: hierarchy via size, weight, color — keep relative hierarchy when text enlarges.
+- Spacing on a **4px** grid (Material). Default page padding **16px** compact; **24px** at `md+`. Related items tighter than unrelated (proximity).
+- Color **roles** (Material): `primary`, `on-primary`, `primary-container`, `secondary`, `error`, `surface`, `surface-container`, `on-surface`, `on-surface-variant`, `outline`. Organizer brand maps to **primary** only — never replace error/surface/on-surface with brand color.
+- Light **and** dark. Follow `prefers-color-scheme` (Apple: do not add a competing in-app appearance switch unless there is a strong product reason; check-in may force a high-contrast light scheme for outdoor scanning).
+- Elevation: **tone + short shadow**, not stacked drop-shadows. Material 3: tone-based surfaces; Apple: depth serves hierarchy, chrome recedes. Public pages: almost flat. Overlays: one step up.
+
+**MUST NOT**
+
+- Hairline text, light-grey-on-white body, or brand-colored body text.
+- Full-bleed edge-to-edge primary buttons on iOS Safari (Apple: inset buttons; respect safe area / home indicator).
+- Decorative glass/blur that drops contrast below AA (Apple Liquid Glass is not a web mandate; if blur is used, provide a solid fallback).
+
+## Touch, layout, navigation
+
+**MUST**
+
+- Primary actions in the **thumb zone** (mid/bottom) on phone. Apple iOS: people hold the phone close; limit on-screen chrome.
+- Content over chrome (**deference**). Navigation explains where you are; it does not compete with the event, the QR, or the scan result.
+- Public: design at 390px; sticky register CTA; tickets tappable with a thumb ([docs/10](docs/10-experience-surfaces.md)).
+- Check-in: **separate shell**, no dashboard chrome. Huge success/fail. One primary action per state.
+- Dashboard: compact density for tables; **never** shrink check-in or public CTAs to dashboard density.
+- Safe areas: `env(safe-area-inset-*)`. Do not hide iOS status bar except immersive camera scan (and then restore chrome after).
+- Hierarchy: one primary button per view (Apple). Distinguish preferred action by **style**, not mismatched sizes.
+
+**MUST NOT**
+
+- Hover-only disclosure on touch devices.
+- Nested modal stacks (Apple sheets: one sheet at a time; close before opening another).
+- Bottom nav + competing sticky CTA that fights the home indicator.
+
+## Forms, errors, empty / loading / success
+
+**MUST**
+
+- Visible labels; help text; errors **next to the field** with how to fix (Apple writing: “Choose a password with at least 8 characters”, not “Invalid”). No blame, no “Oops!”.
+- Validate at a sensible time (blur / submit) — not on every keystroke unless the format is strictly numeric.
+- Destructive actions: confirm; **primary role is never the destructive button** (Apple buttons). Cancel is always available. Button labels are verbs (“Delete event”, not “OK”).
+- Empty states: what happened + **one next action** (Apple writing). Not cute-only illustration.
+- Loading: show structure immediately (placeholders). Determinate progress if duration is known; else indeterminate. Apple: show something before people think the app is broken. Prefer in-button spinner for submits (Apple: label can change to “Checking out…”).
+- Success: explicit, persistent enough to read; check-in success is **full-screen, high contrast, named attendee**.
+- Search (staff attendee search): one obvious field; placeholder states scope (“Name, email, or phone”); show why a result matched; Apple: do not leak search history on a shared staff phone without a clear clear-history path.
+
+## Motion
+
+**MUST**
+
+- Motion explains hierarchy or feedback (Apple: purposeful, not decorative). Interruptible — **never** block input waiting for an animation (Apple: let people cancel motion).
+- Durations (web, Material standard set as fallback): enter **≤ 400ms**, exit **≤ 200ms**, small state **≤ 200ms**, large **≤ 500ms**. Prefer **standard** (utilitarian) over **expressive** bounce. Check-in: **≤ 150ms** or instant.
+- `prefers-reduced-motion` honored everywhere.
+
+**MUST NOT**
+
+- Animate frequent controls (Apple: system already gives subtle feedback; do not add extra motion on every tap).
+- Large zoom, parallax, looping bounce (Apple Reduce Motion; vestibular risk).
+
+## Writing / microcopy
+
+Apple HIG Writing + Inclusion; Material content design.
+
+**MUST**
+
+- Plain language, **sentence case** for most UI. Buttons: short verbs, **title case** only if used consistently for buttons/alerts (pick one and stick). Eventsliner default: **sentence case** for body/headings; buttons **sentence case** verbs (“Check in”, “Publish event”).
+- India: IST on attendee-facing times unless the event timezone is shown; **₹** and INR formatting; phone fields expect `+91`; do not assume given-name / family-name Western order as required separate fields if a single full name works.
+- Inclusive: no gendered defaults; no jargon without explanation; address the person as **you**. Avoid **we** in errors (“Unable to load” not “We’re having trouble”).
+- Privacy: ask for camera/location **only** when the staff/attendee starts that feature; purpose string in plain English (Apple Privacy). Do not preload permission nags on first paint.
+
+**MUST NOT**
+
+- “Click here”. On phones, use **tap** only if you must name the gesture; prefer naming the control.
+- Joke empty states, intern lorem, or US-only copy (ZIP, SSN, “zip code”).
+
+## Surfaces (apply the same system, different density)
+
+| Surface | MUST | MUST NOT |
+|---------|------|----------|
+| Public event page | Clarity first; hero = title, date, place, CTA; fast on 4G; sticky CTA | Decoration-first; giant Eventsliner chrome; hover-only tickets |
+| Organizer dashboard | Dense lists/tables; scannable; keyboard | Cramped tap targets; putting check-in inside dashboard chrome |
+| Check-in (phone, venues, sun) | Huge tap, high contrast, huge type, torch, last scans, unmistakable OK/already/deny | Subtle greys, small type, animations that delay the next scan |
+| Ticket / QR | QR dominant, high contrast, works in brightness; name + event readable | Tiny QR; light-grey QR; animated QR |
+
+## shadcn/ui
+
+**MUST** map CSS variables to Eventsliner tokens (M3 roles). **MUST** override defaults that violate 48px targets, contrast, or focus. **MUST NOT** add a second component library. **MUST NOT** treat Radix/shadcn visual defaults (radius, muted foreground, animation) as approved if they fail this rule.
+
+## Platform quality bar
+
+**MUST** test (or explicitly checklist) iPhone Safari and Android Chrome:
+
+- `env(safe-area-inset-bottom)` on sticky CTAs and check-in.
+- `dvh` / keyboard resizing on forms (checkout, OTP).
+- `inputmode` and autofill.
+- PWA later: standalone safe areas; check-in installable without dashboard URL chrome.
+
+India / mid-range: assume **slow 4G**, **low brightness outdoors**, **shared staff phones**, **Hindi/English mix** later — UI must not depend on tight English string lengths.
+
+## Implementation reminder
+
+This repo is the **plan**. When application code exists: tokens first (START HERE task 2), then shells (`PublicShell`, `AppShell`, `CheckInShell`). No feature UI before tokens match this system.

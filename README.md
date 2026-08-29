@@ -6,6 +6,17 @@ Canonical Git repository: https://github.com/SIDDHARTH-MHC/Live-Eventsliner.git
 
 It is **not** an application yet. No product code has been written. The work here reverse-engineers Dreamcast and the broader event-tech category, then defines the smallest architecture that can eventually compete with enterprise platforms — without copying every feature, and without connecting to Eventsliner Student / Eventsliner.org.
 
+## Always-on constraint: design system
+
+**Building UI without the Eventsliner design system is forbidden.** Every future screen (public pages, dashboard, ticket/QR, check-in, PWA) MUST follow Google Material Design 3 structure plus Apple Human Interface Guidelines for interaction and accessibility — reconciled into one system, not a third look.
+
+| What | Where |
+|------|--------|
+| Operational MUST / MUST NOT (agents, always applied) | [.cursor/rules/design-system.mdc](.cursor/rules/design-system.mdc) |
+| Tokens, surfaces, Material vs HIG resolutions | [docs/16-design-system.md](docs/16-design-system.md) |
+
+Taste bar remains Luma-quality public pages ([D13](docs/DECISIONS.md)). That means **clarity**, not decoration. shadcn/ui is the primitive kit; it does not override these rules.
+
 ---
 
 ## What Eventsliner.live is
@@ -26,7 +37,7 @@ Dreamcast is the reference competitor because it is the strongest India-first *e
 
 ## How to read this plan
 
-Start with the executive thesis, then the capability map, then the core platform. Use START HERE only after the plan is approved.
+Start with the executive thesis, then the capability map, then the core platform. Use START HERE only after the plan is approved. **Do not write application UI** until [16. Design system](docs/16-design-system.md) is treated as a ship gate (see also START HERE task 2).
 
 | # | Document | What it answers |
 |---|----------|-----------------|
@@ -46,6 +57,7 @@ Start with the executive thesis, then the capability map, then the core platform
 | 13 | [MVP, roadmap, tickets](docs/13-mvp-roadmap-tickets.md) | Brutally small MVP, phases, epics, implementation tickets |
 | 14 | [Prioritization, risks, decisions](docs/14-prioritization-risks-decisions.md) | P0–P3, MUST/SHOULD/LATER/INTEGRATE, risks, open decisions |
 | 15 | [START HERE](docs/15-start-here.md) | First 20 engineering tasks after plan approval |
+| 16 | [Design system](docs/16-design-system.md) | Permanent Material 3 + Apple HIG system; tokens, a11y, surfaces |
 
 ## Product principle
 
@@ -113,5 +125,6 @@ Hosting should be India-region first (`ap-south-1` or equivalent) because this p
 |------|--------|
 | Research | Complete |
 | Product / engineering plan | Complete |
+| Design system (Material 3 + HIG) | **Binding** — [16](docs/16-design-system.md), always-on Cursor rule |
 | Implementation | **Not started — by design** |
 | Eventsliner Student / .org connection | Explicitly out of scope |

@@ -175,6 +175,8 @@ Meetups vs paid workshops vs association conferences. **Recommendation:** paid w
 ### D13 — Design taste bar
 Luma-level public pages. Assign someone with taste. A correct-but-ugly MVP will be judged as Townscript.
 
+**Binding constraint:** those pages (and every other surface) ship inside [16-design-system.md](16-design-system.md) — Material Design 3 tokens/structure + Apple HIG interaction and accessibility. Clarity, not decoration. Agents: `.cursor/rules/design-system.mdc` is `alwaysApply: true`. UI that ignores it is out of scope.
+
 ### D14 — Offline check-in in first 10 events
 **No**, unless a specific venue is a basement Faraday cage — then LTE routers, not a 6-week offline sync project.
 

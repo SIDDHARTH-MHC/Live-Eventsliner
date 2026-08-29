@@ -70,6 +70,8 @@ Organizers care more about **unbranded chrome** (no giant Eventsliner banner) th
 
 Design public pages at 390px width first. Sticky register CTA. Tickets must be tappable with a thumb.
 
+**Design system:** [16-design-system.md](16-design-system.md). Public pages are Luma-quality **clarity** (content over chrome), 48px targets, not decoration-first.
+
 ---
 
 ## 14. Event app

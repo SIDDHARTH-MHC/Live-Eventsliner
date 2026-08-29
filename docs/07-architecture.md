@@ -9,7 +9,7 @@ Start small. Scale the **model**, not the number of repos.
 | Layer | Choice | Why |
 |-------|--------|-----|
 | Frontend + BFF | Next.js App Router, TypeScript | One app for public pages, dashboards, check-in |
-| UI | Tailwind + shadcn/ui | Fast, consistent, no second component library |
+| UI | Tailwind + shadcn/ui | Fast, consistent, no second component library. **Tokens and usage MUST follow [16-design-system.md](16-design-system.md)** (Material 3 + Apple HIG). |
 | Auth | First-party sessions (Better Auth or Lucia-style) + OTP | India phone login; avoid Clerk lock-in for PII |
 | DB | PostgreSQL 16 | Transactions, inventory, constraints |
 | Cache / holds / rate limit | Redis | Checkout holds, OTP, queues |

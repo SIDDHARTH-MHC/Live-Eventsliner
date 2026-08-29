@@ -2,6 +2,8 @@
 
 Do not write product feature code until the plan is approved and the decisions in [14-prioritization-risks-decisions.md](14-prioritization-risks-decisions.md) have owners.
 
+**Design system is not optional.** Before any UI (including shells in task 2), follow [16-design-system.md](16-design-system.md) and `.cursor/rules/design-system.mdc` (`alwaysApply: true`). Building screens that ignore Material 3 tokens or the Apple HIG accessibility/interaction bar is forbidden.
+
 When they do, execute **these tasks in order**. This is the first engineering slice — Phase 0 and the first days of Phase 1. It is not the whole MVP.
 
 ---
@@ -26,7 +28,7 @@ Do these as tickets. Each should produce a reviewable PR.
 Official Next.js (TypeScript) + Tailwind + ESLint + Prettier. App Router. Not a hand-rolled webpack. Scaffold in a subfolder, move to repo root. Add `README` with `pnpm dev`, `.env.example`.
 
 ### 2. Add shadcn/ui and the design tokens
-Install shadcn. Set color tokens that can later map to organizer `primary_color`. Build `PageShell` (auth), `AppShell` (organizer), `PublicShell` (event page), `CheckInShell` (later, stub ok). No marketing lorem.
+Install shadcn **after** CSS variables match [16-design-system.md](16-design-system.md) (Material 3 color/type/space/motion roles; 48px targets; light and dark). Map organizer `primary_color` to **primary** roles only. Build `PageShell` (auth), `AppShell` (organizer), `PublicShell` (event page), `CheckInShell` (later, stub ok). No marketing lorem. shadcn defaults that fail contrast, focus, or hit targets **must be overridden**. Do not invent a third visual language.
 
 ### 3. Stand up Postgres + migrations
 Hosted Postgres. Prisma or Drizzle — pick one and stay. Migration runner in CI. No schema-from-dreams: implement **only** `users`, `organizations`, `memberships` first.
