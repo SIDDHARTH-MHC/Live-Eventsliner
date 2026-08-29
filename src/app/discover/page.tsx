@@ -34,9 +34,11 @@ export default function DiscoverPage() {
   const [priceFilter, setPriceFilter] = useState<"" | "free" | "paid">("");
   const [rail, setRail] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     setLoading(true);
+    setError("");
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     if (city) params.set("city", city);
@@ -46,10 +48,15 @@ export default function DiscoverPage() {
     if (rail) params.set("rail", rail);
 
     fetch(`/api/v1/discover?${params.toString()}`)
-      .then((r) => r.json())
-      .then((data) => {
+      .then(async (r) => {
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error?.message ?? "Failed to load events");
         setEvents(data.events ?? []);
         setFacets(data.facets ?? { cities: [], categories: [] });
+      })
+      .catch((e) => {
+        setError(e instanceof Error ? e.message : "Failed to load events");
+        setEvents([]);
       })
       .finally(() => setLoading(false));
   }, [q, city, category, priceFilter, rail]);
@@ -151,6 +158,11 @@ export default function DiscoverPage() {
 
         {loading ? (
           <p className="text-body-lg">Loading events…</p>
+        ) : error ? (
+          <div className="rounded-[var(--radius-md)] border border-outline px-6 py-16 text-center" role="alert">
+            <p className="text-headline-sm">Unable to load events</p>
+            <p className="mt-2 text-body text-muted-foreground">{error}</p>
+          </div>
         ) : events.length === 0 ? (
           <div className="rounded-[var(--radius-md)] border border-outline px-6 py-16 text-center">
             <p className="text-headline-sm">No events found</p>

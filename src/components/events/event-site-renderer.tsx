@@ -44,7 +44,14 @@ export function EventSiteRenderer({ sections, preview }: EventSiteRendererProps)
                 <h2 id={`section-tickets`} className="text-headline">
                   {String(section.data.heading ?? "Tickets")}
                 </h2>
-                <p className="text-body">{String(section.data.message ?? "")}</p>
+                <p className="text-body">
+                  {String(
+                    section.data.registerSlug &&
+                      /opens soon/i.test(String(section.data.message ?? ""))
+                      ? "Choose a ticket and register online."
+                      : (section.data.message ?? ""),
+                  )}
+                </p>
                 {section.data.registerSlug ? (
                   <Button asChild className="min-h-12">
                     <Link href={`/e/${String(section.data.registerSlug)}/register`}>
