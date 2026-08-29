@@ -1,4 +1,5 @@
 import type { EventSiteSection } from "@/lib/events/site-template";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 type EventSiteRendererProps = {
@@ -44,6 +45,13 @@ export function EventSiteRenderer({ sections, preview }: EventSiteRendererProps)
                   {String(section.data.heading ?? "Tickets")}
                 </h2>
                 <p className="text-body">{String(section.data.message ?? "")}</p>
+                {section.data.registerSlug ? (
+                  <Button asChild className="min-h-12">
+                    <Link href={`/e/${String(section.data.registerSlug)}/register`}>
+                      Register now
+                    </Link>
+                  </Button>
+                ) : null}
               </div>
             ) : null}
             {section.type === "venue" ? (
@@ -82,10 +90,10 @@ export function EventSiteRenderer({ sections, preview }: EventSiteRendererProps)
   );
 }
 
-export function StickyRegisterCta() {
+export function StickyRegisterCta({ slug }: { slug: string }) {
   return (
-    <Button className="w-full" size="lg" disabled aria-disabled>
-      Register — coming in Phase 2
+    <Button asChild className="w-full min-h-12" size="lg">
+      <Link href={`/e/${slug}/register`}>Register</Link>
     </Button>
   );
 }

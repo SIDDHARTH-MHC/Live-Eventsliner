@@ -64,6 +64,73 @@ enum MediaStatus {
   failed
 }
 
+enum RegistrationMode {
+  open_free
+  open_paid
+  rsvp
+}
+
+enum TicketTypeVisibility {
+  public
+  hidden
+}
+
+enum RegistrationStatus {
+  started
+  pending_payment
+  pending_approval
+  confirmed
+  waitlisted
+  rejected
+  cancelled
+  expired
+}
+
+enum RegistrationSource {
+  web
+  import
+  onsite
+  invite
+}
+
+enum OrderStatus {
+  created
+  pending
+  paid
+  failed
+  refunded
+  partially_refunded
+  expired
+}
+
+enum PaymentStatus {
+  created
+  authorized
+  captured
+  failed
+  refunded
+}
+
+enum AttendeeStatus {
+  registered
+  checked_in
+  no_show
+  cancelled
+}
+
+enum CredentialStatus {
+  active
+  revoked
+  expired
+  superseded
+}
+
+enum RefundStatus {
+  pending
+  processed
+  failed
+}
+
 model User {
   id               String     @id @default(cuid())
   email            String?    @unique
@@ -90,19 +157,21 @@ model User {
 }
 
 model Organization {
-  id             String    @id @default(cuid())
-  name           String
-  slug           String    @unique
-  logoMediaId    String?   @map("logo_media_id")
-  primaryColor   String?   @map("primary_color")
-  supportEmail   String?   @map("support_email")
-  supportPhone   String?   @map("support_phone")
-  gstin          String?
-  billingAddress Json?     @map("billing_address")
-  country        String    @default("IN")
-  timezone       String    @default("Asia/Kolkata")
-  status         OrgStatus @default(active)
-  createdAt      DateTime  @default(now()) @map("created_at")
+  id               String    @id @default(cuid())
+  name             String
+  slug             String    @unique
+  logoMediaId      String?   @map("logo_media_id")
+  primaryColor     String?   @map("primary_color")
+  supportEmail     String?   @map("support_email")
+  supportPhone     String?   @map("support_phone")
+  gstin            String?
+  billingAddress   Json?     @map("billing_address")
+  country          String    @default("IN")
+  timezone         String    @default("Asia/Kolkata")
+  status           OrgStatus @default(active)
+  razorpayKeyId    String?   @map("razorpay_key_id")
+  razorpayKeySecret String?  @map("razorpay_key_secret")
+  createdAt        DateTime  @default(now()) @map("created_at")
 
   memberships Membership[]
   events      Event[]
@@ -236,10 +305,17 @@ model Event {
   createdAt       DateTime        @default(now()) @map("created_at")
   updatedAt       DateTime        @updatedAt @map("updated_at")
 
-  org       Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  createdBy User?           @relation("EventCreator", fields: [createdById], references: [id], onDelete: SetNull)
-  site      EventSite?
-  analytics AnalyticsEvent[]
+  registrationFormSchema Json?            @map("registration_form_schema")
+  registrationMode       RegistrationMode @default(open_free) @map("registration_mode")
+
+  org            Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  createdBy      User?            @relation("EventCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  site           EventSite?
+  analytics      AnalyticsEvent[]
+  ticketTypes    TicketType[]
+  registrations  Registration[]
+  attendees      Attendee[]
+  orders         Order[]
 
   @@unique([orgId, slug])
   @@index([orgId, startsAt])
@@ -278,4 +354,235 @@ model AnalyticsEvent {
   @@index([orgId, createdAt])
   @@index([eventId, createdAt])
   @@map("analytics_events")
+}
+
+model TicketType {
+  id             String               @id @default(cuid())
+  eventId        String               @map("event_id")
+  orgId          String               @map("org_id")
+  name           String
+  description    String?
+  priceCents     Int                  @default(0) @map("price_cents")
+  currency       String               @default("INR")
+  quantity       Int?
+  soldCount      Int                  @default(0) @map("sold_count")
+  salesStartsAt  DateTime?            @map("sales_starts_at")
+  salesEndsAt    DateTime?            @map("sales_ends_at")
+  visibility     TicketTypeVisibility @default(public)
+  accessCode     String?              @map("access_code")
+  sortOrder      Int                  @default(0) @map("sort_order")
+  isActive       Boolean              @default(true) @map("is_active")
+  mode           RegistrationMode     @default(open_free)
+  formSchema     Json?                @map("form_schema")
+  metadata       Json                 @default("{}")
+  createdAt      DateTime             @default(now()) @map("created_at")
+  updatedAt      DateTime             @updatedAt @map("updated_at")
+
+  event           Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  inventoryHolds  InventoryHold[]
+  registrations   Registration[]
+  attendees       Attendee[]
+
+  @@index([eventId, sortOrder])
+  @@map("ticket_types")
+}
+
+model InventoryHold {
+  id           String   @id @default(cuid())
+  ticketTypeId String   @map("ticket_type_id")
+  qty          Int      @default(1)
+  expiresAt    DateTime @map("expires_at")
+  orderId      String?  @map("order_id")
+  sessionId    String?  @map("session_id")
+  registrationId String? @map("registration_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  ticketType TicketType @relation(fields: [ticketTypeId], references: [id], onDelete: Cascade)
+  order      Order?     @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([ticketTypeId])
+  @@index([expiresAt])
+  @@map("inventory_holds")
+}
+
+model Registration {
+  id           String             @id @default(cuid())
+  eventId      String             @map("event_id")
+  orgId        String             @map("org_id")
+  ticketTypeId String             @map("ticket_type_id")
+  orderId      String?            @map("order_id")
+  status       RegistrationStatus @default(started)
+  source       RegistrationSource @default(web)
+  answers      Json               @default("{}")
+  utm          Json?
+  startedAt    DateTime           @default(now()) @map("started_at")
+  confirmedAt  DateTime?          @map("confirmed_at")
+  cancelledAt  DateTime?          @map("cancelled_at")
+  createdAt    DateTime           @default(now()) @map("created_at")
+  updatedAt    DateTime           @updatedAt @map("updated_at")
+
+  event      Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  ticketType TicketType   @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
+  order      Order?       @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  attendee   Attendee?
+  consents   ConsentRecord[]
+
+  @@index([eventId, status])
+  @@index([eventId, createdAt])
+  @@index([orderId])
+  @@map("registrations")
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  eventId         String      @map("event_id")
+  orgId           String      @map("org_id")
+  buyerEmail      String      @map("buyer_email")
+  buyerPhone      String?     @map("buyer_phone")
+  buyerName       String?     @map("buyer_name")
+  status          OrderStatus @default(created)
+  subtotalCents   Int         @default(0) @map("subtotal_cents")
+  discountCents   Int         @default(0) @map("discount_cents")
+  taxCents        Int         @default(0) @map("tax_cents")
+  feeCents        Int         @default(0) @map("fee_cents")
+  totalCents      Int         @default(0) @map("total_cents")
+  currency        String      @default("INR")
+  couponId        String?     @map("coupon_id")
+  provider        String      @default("razorpay")
+  providerOrderId String?     @unique @map("provider_order_id")
+  gstinBuyer      String?     @map("gstin_buyer")
+  gstinSeller     String?     @map("gstin_seller")
+  taxBreakup      Json?       @map("tax_breakup")
+  expiresAt       DateTime?   @map("expires_at")
+  paidAt          DateTime?   @map("paid_at")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  event            Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  registrations    Registration[]
+  inventoryHolds   InventoryHold[]
+  payments         Payment[]
+  refunds          Refund[]
+
+  @@index([eventId, status])
+  @@map("orders")
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  orderId           String        @map("order_id")
+  provider          String        @default("razorpay")
+  providerPaymentId String        @unique @map("provider_payment_id")
+  status            PaymentStatus @default(created)
+  amountCents       Int           @map("amount_cents")
+  method            String?
+  rawLastPayload    Json?         @map("raw_last_payload")
+  createdAt         DateTime      @default(now()) @map("created_at")
+
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  refunds Refund[]
+
+  @@index([orderId])
+  @@map("payments")
+}
+
+model Refund {
+  id               String       @id @default(cuid())
+  orderId          String       @map("order_id")
+  paymentId        String       @map("payment_id")
+  amountCents      Int          @map("amount_cents")
+  reason           String?
+  status           RefundStatus @default(pending)
+  providerRefundId String?      @unique @map("provider_refund_id")
+  createdById      String?      @map("created_by")
+  createdAt        DateTime     @default(now()) @map("created_at")
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("refunds")
+}
+
+model Attendee {
+  id             String         @id @default(cuid())
+  eventId        String         @map("event_id")
+  orgId          String         @map("org_id")
+  registrationId String         @unique @map("registration_id")
+  ticketTypeId   String         @map("ticket_type_id")
+  userId         String?        @map("user_id")
+  firstName      String         @map("first_name")
+  lastName       String         @map("last_name")
+  email          String
+  phone          String?
+  company        String?
+  jobTitle       String?        @map("job_title")
+  category       String?
+  status         AttendeeStatus @default(registered)
+  answers        Json           @default("{}")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  event        Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  ticketType   TicketType   @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
+  registration Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  credential   Credential?
+
+  @@index([eventId, email])
+  @@index([eventId, phone])
+  @@index([eventId, lastName])
+  @@index([eventId, status])
+  @@map("attendees")
+}
+
+model Credential {
+  id           String           @id @default(cuid())
+  attendeeId   String           @unique @map("attendee_id")
+  eventId      String           @map("event_id")
+  publicId     String           @unique @map("public_id")
+  secretHash   String           @map("secret_hash")
+  kind         String           @default("qr")
+  status       CredentialStatus @default(active)
+  issuedAt     DateTime         @default(now()) @map("issued_at")
+  revokedAt    DateTime?        @map("revoked_at")
+  revokeReason String?          @map("revoke_reason")
+
+  attendee Attendee @relation(fields: [attendeeId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, status])
+  @@map("credentials")
+}
+
+model ConsentRecord {
+  id             String   @id @default(cuid())
+  registrationId String   @map("registration_id")
+  kind           String
+  version        String
+  accepted       Boolean
+  acceptedAt     DateTime @default(now()) @map("accepted_at")
+  ip             String?
+
+  registration Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+
+  @@index([registrationId])
+  @@map("consent_records")
+}
+
+model Coupon {
+  id              String   @id @default(cuid())
+  eventId         String   @map("event_id")
+  code            String
+  type            String
+  value           Int
+  maxRedemptions  Int?     @map("max_redemptions")
+  redeemed        Int      @default(0)
+  minOrderCents   Int?     @map("min_order_cents")
+  ticketTypeIds   String[] @map("ticket_type_ids")
+  startsAt        DateTime? @map("starts_at")
+  endsAt          DateTime? @map("ends_at")
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@unique([eventId, code])
+  @@map("coupons")
 }

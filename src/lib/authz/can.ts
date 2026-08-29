@@ -11,7 +11,12 @@ export type Action =
   | "event:update"
   | "event:publish"
   | "event:delete"
-  | "media:upload";
+  | "media:upload"
+  | "ticket:manage"
+  | "registration:manage"
+  | "attendee:read"
+  | "attendee:manage"
+  | "org:payments";
 
 export type Resource =
   | { type: "organization"; org: Organization }
@@ -78,7 +83,11 @@ export async function can(actor: Actor, action: Action, resource: Resource): Pro
     case "event:update":
     case "event:publish":
     case "event:delete":
-    case "media:upload": {
+    case "media:upload":
+    case "ticket:manage":
+    case "registration:manage":
+    case "attendee:read":
+    case "attendee:manage": {
       if (resource.type === "event") {
         const role = await getMembershipRole(actor.id, resource.event.orgId);
         return isOrgAdminRole(role);
@@ -88,6 +97,12 @@ export async function can(actor: Actor, action: Action, resource: Resource): Pro
         return isOrgAdminRole(role);
       }
       return false;
+    }
+
+    case "org:payments": {
+      if (resource.type !== "organization") return false;
+      const role = await getMembershipRole(actor.id, resource.org.id);
+      return role === "owner" || role === "admin";
     }
 
     default:

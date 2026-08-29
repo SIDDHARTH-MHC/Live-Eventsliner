@@ -27,22 +27,57 @@ Last updated: 2026-08-29
 | 19 | AnalyticsEvent + track() | ✅ Done |
 | 20 | Staging runbook in README + seed script | ✅ Done |
 
+## Phase 2 — Registration + ticketing + payments
+
+| Epic | Status |
+|------|--------|
+| E2.1 Ticket types + inventory + holds | ✅ Done |
+| E2.2 Form schema + renderer | ✅ Done |
+| E2.3 Registration state machine | ✅ Done |
+| E2.4 Razorpay orders + webhooks (mock in dev) | ✅ Done |
+| E2.5 Attendee materialization + credential stub | ✅ Done |
+| E2.6 Organizer attendee directory | ✅ Done |
+
+### Backend
+
+- Prisma: `ticket_types`, `inventory_holds`, `registrations`, `orders`, `payments`, `refunds`, `attendees`, `credentials`, `consent_records`, `coupons`
+- Org Razorpay keys on `organizations`
+- Inventory holds (Redis + Postgres, memory fallback)
+- Hold sweeper: `POST /api/v1/cron/expire-holds`
+- Registration service + state machine (free, paid, RSVP)
+- Razorpay adapter + mock provider when keys missing
+- Webhook idempotency on `provider_payment_id`
+- Publish blocks paid tickets without Razorpay connected
+- Confirmation email on `registration.confirmed`
+
+### Frontend
+
+- Organizer: ticket types, form editor, attendees table, Razorpay settings
+- Public: `/e/:slug/register` → checkout → pending poll → confirmed
+- Sold out / empty / error states
+
+### Tests
+
+- `src/lib/registration/phase2.test.ts` — holds, state machine, webhook idempotency, tenant isolation
+
 ## Dev server
 
 - **Port:** 43123
 - **URL:** http://localhost:43123
 - **Public demo:** http://localhost:43123/e/delhi-demo-product-workshop
+- **Register demo:** http://localhost:43123/e/delhi-demo-product-workshop/register
 
-## Next (Phase 2 per roadmap)
+## Next (Phase 3)
 
-1. Ticket types + registration forms
-2. Razorpay checkout
-3. Credentials / QR
+1. Credential QR render + attendee ticket page
+2. Staff check-in PWA + scan/search
+3. CSV export + live counts
 4. Do **not** start discovery (`/discover`) until Phase 3 check-in spine is done
 
 ## Blockers / notes
 
-- **Postgres + Redis** required locally (or Docker Compose). Cloud agent installs Postgres/Redis via apt if needed.
+- **Postgres + Redis** required locally (or Docker Compose).
+- **Razorpay:** mock checkout when keys unset; set org keys or `RAZORPAY_*` env for test mode.
 - **S3/MinIO** optional in dev — presigned upload returns `devMode: true` without endpoint.
 - **MSG91 / Resend** optional in dev — console providers log to stdout.
 - **GitHub push** to `origin` may require user credentials; `origin-cursor` used when available.

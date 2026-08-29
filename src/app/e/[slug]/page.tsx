@@ -26,7 +26,11 @@ export default async function PublicEventPage({ params }: Props) {
     userAgent: h.get("user-agent") ?? undefined,
   });
 
-  const sections = event.site.sections as EventSiteSection[];
+  const sections = (event.site.sections as EventSiteSection[]).map((s) =>
+    s.type === "tickets"
+      ? { ...s, data: { ...s.data, registerSlug: slug } }
+      : s,
+  );
   const theme = event.site.theme as { primaryColor?: string };
 
   const jsonLd = {
@@ -66,7 +70,7 @@ export default async function PublicEventPage({ params }: Props) {
         eventTitle={event.title}
         organizerName={event.org.name}
         primaryColor={theme.primaryColor}
-        stickyCta={<StickyRegisterCta />}
+        stickyCta={<StickyRegisterCta slug={slug} />}
       >
         <EventSiteRenderer sections={sections} />
       </PublicShell>

@@ -55,9 +55,14 @@ export default async function OrgHomePage({ params }: Props) {
         <div className="space-y-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <h1 className="text-headline">Events</h1>
-            <Button asChild>
-              <Link href={`/orgs/${org.slug}/events/new`}>Create event</Link>
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild variant="outline">
+                <Link href={`/orgs/${org.slug}/settings/razorpay`}>Razorpay</Link>
+              </Button>
+              <Button asChild>
+                <Link href={`/orgs/${org.slug}/events/new`}>Create event</Link>
+              </Button>
+            </div>
           </div>
           <ul className="space-y-3">
             {org.events.map((event) => (

@@ -73,12 +73,27 @@ export async function createEvent(input: CreateEventInput) {
 export async function publishEvent(eventId: string, actorId: string) {
   const event = await db.event.findUniqueOrThrow({
     where: { id: eventId },
-    include: { site: true, org: true },
+    include: { site: true, org: true, ticketTypes: { where: { isActive: true } } },
   });
 
   if (!event.title?.trim()) throw new Error("TITLE_REQUIRED");
   if (!event.startsAt) throw new Error("STARTS_AT_REQUIRED");
   if (!event.timezone) throw new Error("TIMEZONE_REQUIRED");
+
+  const hasPaidTickets = event.ticketTypes.some((t) => t.priceCents > 0);
+  if (hasPaidTickets) {
+    const hasRazorpay =
+      (event.org.razorpayKeyId && event.org.razorpayKeySecret) ||
+      (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET);
+    if (!hasRazorpay) {
+      throw new Error("RAZORPAY_REQUIRED_FOR_PAID_TICKETS");
+    }
+  }
+
+  const activeTickets = event.ticketTypes.filter((t) => t.isActive);
+  if (activeTickets.length === 0) {
+    throw new Error("TICKET_TYPES_REQUIRED");
+  }
 
   const updated = await db.event.update({
     where: { id: eventId },

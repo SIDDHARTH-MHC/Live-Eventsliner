@@ -33,7 +33,13 @@ export default async function EventPreviewPage({ params }: Props) {
       eventTitle={event.title}
       organizerName={event.org.name}
       primaryColor={theme.primaryColor}
-      stickyCta={<StickyRegisterCta />}
+      stickyCta={
+        event.publicSlug ? (
+          <StickyRegisterCta slug={event.publicSlug} />
+        ) : (
+          <StickyRegisterCta slug={`preview-${event.id}`} />
+        )
+      }
     >
       <EventSiteRenderer sections={sections} preview />
     </PublicShell>

@@ -48,7 +48,8 @@ export function buildDefaultEventSiteSections(event: {
       visible: true,
       data: {
         heading: "Tickets",
-        message: "Registration opens soon.",
+        message: "Choose a ticket and register online.",
+        registerSlug: null as string | null,
       },
     },
     {

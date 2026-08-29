@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { createEvent, publishEvent } from "../src/lib/events/service";
+import { DEFAULT_FORM_SCHEMA } from "../src/lib/registration/form-schema";
 
 const db = new PrismaClient();
 
@@ -34,8 +35,9 @@ async function main() {
     });
   }
 
-  const existingEvent = await db.event.findFirst({
+  let existingEvent = await db.event.findFirst({
     where: { orgId: org.id, slug: "product-workshop" },
+    include: { ticketTypes: true },
   });
 
   if (!existingEvent) {
@@ -58,14 +60,79 @@ async function main() {
       createdById: user.id,
     });
 
+    await db.event.update({
+      where: { id: event.id },
+      data: { registrationFormSchema: DEFAULT_FORM_SCHEMA },
+    });
+
+    await db.ticketType.createMany({
+      data: [
+        {
+          eventId: event.id,
+          orgId: org.id,
+          name: "Free seat",
+          description: "General admission — no payment required",
+          priceCents: 0,
+          mode: "open_free",
+          quantity: 50,
+          sortOrder: 0,
+        },
+        {
+          eventId: event.id,
+          orgId: org.id,
+          name: "VIP workshop pass",
+          description: "Includes front-row seating and materials (mock paid — use dev checkout)",
+          priceCents: 49900,
+          mode: "open_paid",
+          quantity: 20,
+          sortOrder: 1,
+        },
+        {
+          eventId: event.id,
+          orgId: org.id,
+          name: "RSVP",
+          description: "Let us know if you are coming",
+          priceCents: 0,
+          mode: "rsvp",
+          quantity: null,
+          sortOrder: 2,
+        },
+      ],
+    });
+
     await publishEvent(event.id, user.id);
     console.log(`Seeded published event: /e/${orgSlug}-product-workshop`);
+  } else if (existingEvent.ticketTypes.length === 0) {
+    await db.ticketType.createMany({
+      data: [
+        {
+          eventId: existingEvent.id,
+          orgId: org.id,
+          name: "Free seat",
+          priceCents: 0,
+          mode: "open_free",
+          quantity: 50,
+          sortOrder: 0,
+        },
+        {
+          eventId: existingEvent.id,
+          orgId: org.id,
+          name: "VIP workshop pass",
+          priceCents: 49900,
+          mode: "open_paid",
+          quantity: 20,
+          sortOrder: 1,
+        },
+      ],
+    });
+    console.log("Added ticket types to existing demo event");
   } else {
     console.log("Seed event already exists — skipping");
   }
 
   console.log(`Demo user: ${email}`);
   console.log(`Demo org: /orgs/${orgSlug}`);
+  console.log(`Register: /e/${orgSlug}-product-workshop/register`);
 }
 
 main()
