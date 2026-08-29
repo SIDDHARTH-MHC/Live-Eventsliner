@@ -148,6 +148,21 @@ export default function EventSettingsPage() {
               Attendees
             </Link>
           </Button>
+          <Button asChild variant="outline">
+            <Link href={`/orgs/${params.orgSlug}/events/${params.eventId}/live`}>
+              Live
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href={`/orgs/${params.orgSlug}/events/${params.eventId}/check-in`}>
+              Check-in
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href={`/orgs/${params.orgSlug}/events/${params.eventId}/staff`}>
+              Staff
+            </Link>
+          </Button>
           {event.status === "published" ? (
             <Button variant="secondary" onClick={unpublish}>
               Unpublish

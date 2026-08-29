@@ -16,6 +16,9 @@ export type Action =
   | "registration:manage"
   | "attendee:read"
   | "attendee:manage"
+  | "attendee:export"
+  | "checkin:scan"
+  | "checkin:manage"
   | "org:payments";
 
 export type Resource =
@@ -33,6 +36,13 @@ async function getMembershipRole(
     where: { orgId_userId: { orgId, userId } },
   });
   return membership?.role ?? null;
+}
+
+async function isEventStaffMember(userId: string, eventId: string): Promise<boolean> {
+  const staff = await db.eventStaff.findFirst({
+    where: { eventId, userId, acceptedAt: { not: null } },
+  });
+  return !!staff;
 }
 
 function isOrgAdminRole(role: MembershipRole | null): boolean {
@@ -87,7 +97,9 @@ export async function can(actor: Actor, action: Action, resource: Resource): Pro
     case "ticket:manage":
     case "registration:manage":
     case "attendee:read":
-    case "attendee:manage": {
+    case "attendee:manage":
+    case "attendee:export":
+    case "checkin:manage": {
       if (resource.type === "event") {
         const role = await getMembershipRole(actor.id, resource.event.orgId);
         return isOrgAdminRole(role);
@@ -97,6 +109,13 @@ export async function can(actor: Actor, action: Action, resource: Resource): Pro
         return isOrgAdminRole(role);
       }
       return false;
+    }
+
+    case "checkin:scan": {
+      if (resource.type !== "event") return false;
+      const role = await getMembershipRole(actor.id, resource.event.orgId);
+      if (isOrgAdminRole(role)) return true;
+      return isEventStaffMember(actor.id, resource.event.id);
     }
 
     case "org:payments": {

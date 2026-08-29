@@ -26,6 +26,7 @@ export default function AttendeesPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [status, setStatus] = useState<"loading" | "idle">("loading");
   const [message, setMessage] = useState("");
+  const [live, setLive] = useState<{ registered: number; checkedIn: number } | null>(null);
 
   function load() {
     const qs = new URLSearchParams();
@@ -43,6 +44,9 @@ export default function AttendeesPage() {
 
   useEffect(() => {
     load();
+    fetch(`/api/v1/events/${params.eventId}/live`)
+      .then((r) => r.json())
+      .then((data) => setLive({ registered: data.registered, checkedIn: data.checkedIn }));
   }, [params.orgSlug, params.eventId, query, statusFilter]);
 
   async function cancelRegistration(registrationId: string) {
@@ -89,6 +93,34 @@ export default function AttendeesPage() {
           ← Event settings
         </Link>
         <h1 className="mt-2 text-headline">Attendees</h1>
+      </div>
+
+      {live ? (
+        <div className="flex flex-wrap gap-4 rounded-[var(--radius-md)] bg-surface-container px-4 py-3 text-body">
+          <span>
+            <strong>{live.registered}</strong> registered
+          </span>
+          <span>
+            <strong>{live.checkedIn}</strong> checked in
+          </span>
+          <Link
+            href={`/orgs/${params.orgSlug}/events/${params.eventId}/live`}
+            className="text-primary underline"
+          >
+            Live dashboard
+          </Link>
+        </div>
+      ) : null}
+
+      <div className="flex flex-wrap gap-2">
+        <Button asChild variant="outline" className="min-h-12">
+          <a
+            href={`/api/v1/orgs/${params.orgSlug}/events/${params.eventId}/attendees/export`}
+            download
+          >
+            Export CSV
+          </a>
+        </Button>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row">

@@ -4,6 +4,7 @@ import { withApiContext, json, validateOrigin, errorJson } from "@/lib/api/respo
 import { db } from "@/lib/db";
 import { can } from "@/lib/authz/can";
 import { getEmailProvider } from "@/lib/email/provider";
+import { ensureTicketToken, ticketUrl } from "@/lib/credentials/ticket-token";
 
 type RouteParams = {
   params: Promise<{ orgSlug: string; eventId: string; registrationId: string }>;
@@ -44,12 +45,14 @@ export async function POST(request: Request, { params }: RouteParams) {
     }
 
     const attendee = loaded.registration.attendee;
+    const token = await ensureTicketToken(attendee.id);
+    const passUrl = ticketUrl(token);
     const appUrl = process.env.APP_URL ?? "http://localhost:43123";
     const email = getEmailProvider();
     await email.send({
       to: attendee.email,
       subject: `Confirmation — ${loaded.registration.event.title}`,
-      html: `<p>Hi ${attendee.firstName}, this is a resent confirmation for ${loaded.registration.event.title}. <a href="${appUrl}/e/${loaded.registration.event.publicSlug}">View event</a></p>`,
+      html: `<p>Hi ${attendee.firstName}, this is a resent confirmation for ${loaded.registration.event.title}. <a href="${passUrl}">Open your ticket & QR pass</a>. <a href="${appUrl}/e/${loaded.registration.event.publicSlug}">View event</a></p>`,
     });
 
     return json({ sent: true });

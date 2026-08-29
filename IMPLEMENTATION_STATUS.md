@@ -38,27 +38,29 @@ Last updated: 2026-08-29
 | E2.5 Attendee materialization + credential stub | ✅ Done |
 | E2.6 Organizer attendee directory | ✅ Done |
 
-### Backend
+## Phase 3 — Check-in + attendance
 
-- Prisma: `ticket_types`, `inventory_holds`, `registrations`, `orders`, `payments`, `refunds`, `attendees`, `credentials`, `consent_records`, `coupons`
-- Org Razorpay keys on `organizations`
-- Inventory holds (Redis + Postgres, memory fallback)
-- Hold sweeper: `POST /api/v1/cron/expire-holds`
-- Registration service + state machine (free, paid, RSVP)
-- Razorpay adapter + mock provider when keys missing
-- Webhook idempotency on `provider_payment_id`
-- Publish blocks paid tickets without Razorpay connected
-- Confirmation email on `registration.confirmed`
+| Epic | Status |
+|------|--------|
+| E3.1 Credential issue/revoke/QR (128-bit public_id) | ✅ Done |
+| E3.2 Attendee ticket page `/tickets/:token` | ✅ Done |
+| E3.3 Staff invite + check-in PWA (scan + search) | ✅ Done |
+| E3.4 Check-in API + live counts | ✅ Done |
+| E3.5 T-24h reminder cron | ✅ Done |
+| E3.6 Analytics on check-in | ✅ Done |
+| E3.7 CSV export + audit | ✅ Done |
 
-### Frontend
+### Key URLs (Phase 3)
 
-- Organizer: ticket types, form editor, attendees table, Razorpay settings
-- Public: `/e/:slug/register` → checkout → pending poll → confirmed
-- Sold out / empty / error states
+- Ticket page: `/tickets/:token`
+- Check-in PWA: `/orgs/:orgSlug/events/:eventId/check-in`
+- Live dashboard: `/orgs/:orgSlug/events/:eventId/live`
+- Staff management: `/orgs/:orgSlug/events/:eventId/staff`
+- APIs: `POST /api/v1/events/:eventId/check-ins`, `GET .../live`, `GET .../check-ins/search`
 
 ### Tests
 
-- `src/lib/registration/phase2.test.ts` — holds, state machine, webhook idempotency, tenant isolation
+- `src/lib/checkin/phase3.test.ts` — ok/already/revoked/idempotency
 
 ## Dev server
 
@@ -66,18 +68,17 @@ Last updated: 2026-08-29
 - **URL:** http://localhost:43123
 - **Public demo:** http://localhost:43123/e/delhi-demo-product-workshop
 - **Register demo:** http://localhost:43123/e/delhi-demo-product-workshop/register
+- **Check-in staff demo phone:** +919888877766
 
-## Next (Phase 3)
+## Next (Phase 4)
 
-1. Credential QR render + attendee ticket page
-2. Staff check-in PWA + scan/search
-3. CSV export + live counts
-4. Do **not** start discovery (`/discover`) until Phase 3 check-in spine is done
+1. `/discover` browse + search (PUBLIC events only)
+2. Organizer profile `/o/:orgSlug`
+3. Discovery metadata (city, category, tags)
 
 ## Blockers / notes
 
 - **Postgres + Redis** required locally (or Docker Compose).
-- **Razorpay:** mock checkout when keys unset; set org keys or `RAZORPAY_*` env for test mode.
-- **S3/MinIO** optional in dev — presigned upload returns `devMode: true` without endpoint.
-- **MSG91 / Resend** optional in dev — console providers log to stdout.
+- **Razorpay:** mock checkout when keys unset.
+- **Camera check-in** requires HTTPS or localhost; manual input fallback available.
 - **GitHub push** to `origin` may require user credentials; `origin-cursor` used when available.

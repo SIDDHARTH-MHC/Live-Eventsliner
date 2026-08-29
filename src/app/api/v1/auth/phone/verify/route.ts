@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { verifyOtp } from "@/lib/auth/credentials";
 import { createSession, sessionCookieOptions } from "@/lib/auth/session";
 import { withApiContext, json, validateOrigin, errorJson } from "@/lib/api/response";
+import { db } from "@/lib/db";
 
 const schema = z.object({
   phone: z.string().min(8).max(20),
@@ -28,6 +29,12 @@ export async function POST(request: Request) {
     const token = await createSession(userId);
     const cookieStore = await cookies();
     cookieStore.set(sessionCookieOptions(token));
+
+    const phone = parsed.data.phone.trim();
+    await db.eventStaff.updateMany({
+      where: { phone, acceptedAt: null },
+      data: { userId, acceptedAt: new Date() },
+    });
 
     return json({ ok: true });
   });

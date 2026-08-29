@@ -3,7 +3,8 @@ import { db } from "@/lib/db";
 import { extractSystemFields } from "@/lib/registration/form-schema";
 import { getEmailProvider } from "@/lib/email/provider";
 import { track } from "@/lib/analytics/track";
-import { nanoid } from "nanoid";
+import { generatePublicId } from "@/lib/credentials/public-id";
+import { ensureTicketToken, ticketUrl } from "@/lib/credentials/ticket-token";
 import type { Prisma } from "@prisma/client";
 
 function hashSecret(secret: string): string {
@@ -44,7 +45,7 @@ export async function materializeAttendee(registrationId: string) {
       },
     });
 
-    const publicId = nanoid(16);
+    const publicId = generatePublicId();
     const secret = randomBytes(32).toString("base64url");
     await tx.credential.create({
       data: {
@@ -60,6 +61,8 @@ export async function materializeAttendee(registrationId: string) {
     return created;
   });
 
+  await ensureTicketToken(attendee.id);
+
   await track("register_complete", {
     orgId: registration.orgId,
     eventId: registration.eventId,
@@ -73,15 +76,19 @@ export async function materializeAttendee(registrationId: string) {
 
 async function sendConfirmationEmail(
   registration: {
+    id: string;
     event: { title: string; publicSlug: string | null; startsAt: Date | null; timezone: string };
     ticketType: { name: string };
   },
-  attendee: { firstName: string; lastName: string; email: string },
+  attendee: { id: string; firstName: string; lastName: string; email: string },
 ) {
   const appUrl = process.env.APP_URL ?? "http://localhost:43123";
   const eventUrl = registration.event.publicSlug
     ? `${appUrl}/e/${registration.event.publicSlug}`
     : appUrl;
+
+  const token = await ensureTicketToken(attendee.id);
+  const passUrl = ticketUrl(token);
 
   const dateLabel = registration.event.startsAt
     ? new Intl.DateTimeFormat("en-IN", {
@@ -100,10 +107,11 @@ async function sendConfirmationEmail(
       <p>You're confirmed for <strong>${registration.event.title}</strong>.</p>
       <p><strong>Ticket:</strong> ${registration.ticketType.name}</p>
       <p><strong>When:</strong> ${dateLabel}</p>
+      <p><a href="${passUrl}"><strong>Open your ticket & QR pass</strong></a></p>
       <p><a href="${eventUrl}">View event page</a></p>
-      <p>Your QR ticket will be available in Phase 3. Save this email for now.</p>
+      <p>Show the QR code at the gate for check-in.</p>
     `,
-    text: `Hi ${attendee.firstName}, you're registered for ${registration.event.title}. Ticket: ${registration.ticketType.name}. When: ${dateLabel}.`,
+    text: `Hi ${attendee.firstName}, you're registered for ${registration.event.title}. Ticket: ${registration.ticketType.name}. When: ${dateLabel}. Your pass: ${passUrl}`,
   });
 }
 
